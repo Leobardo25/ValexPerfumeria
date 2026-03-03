@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * ========================================
+ *  🎨 THEME CSS VARIABLES
+ * ========================================
+ *  These CSS variables match the THEME object
+ *  in tailwind.config.js. Update BOTH files
+ *  when changing the theme.
+ *
+ *  These are used for scrollbar, gradient
+ *  animations, and glow effects that can't
+ *  use Tailwind classes directly.
+ * ========================================
+ */
+:root {
+  --primary: #B8860B;
+  --accent: #D4AF37;
+  --accent-light: #E8D48B;
+  --dark: #0F0F0F;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Custom thin scrollbar with theme colors */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--primary), var(--accent));
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--accent), var(--accent-light));
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--dark);
+}
+
+/* Animated gradient text for logo */
+@keyframes gradientSweep {
+  0% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: -100% 50%;
+  }
+}
+
+.animate-gradient-text {
+  background: linear-gradient(90deg,
+      #ffffff 0%,
+      #ffffff 30%,
+      var(--accent) 45%,
+      var(--primary) 50%,
+      var(--accent) 55%,
+      #ffffff 70%,
+      #ffffff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientSweep 6s linear infinite;
+}
+
+/* Floating button gradient glow */
+@keyframes glowPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 15px 3px rgba(212, 175, 55, 0.4),
+      0 0 30px 6px rgba(184, 134, 11, 0.2);
+  }
+
+  50% {
+    box-shadow: 0 0 20px 6px rgba(212, 175, 55, 0.6),
+      0 0 40px 10px rgba(184, 134, 11, 0.3);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 2.5s ease-in-out infinite;
+}
