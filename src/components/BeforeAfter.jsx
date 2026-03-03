@@ -6,13 +6,18 @@ export default function BeforeAfter() {
     const [sliderPos, setSliderPos] = useState(50)
     const containerRef = useRef(null)
     const isDragging = useRef(false)
+    const rafRef = useRef(null)
 
     const updatePosition = useCallback((clientX) => {
         if (!containerRef.current) return
         const rect = containerRef.current.getBoundingClientRect()
         const x = Math.max(0, Math.min(clientX - rect.left, rect.width))
         const percent = (x / rect.width) * 100
-        setSliderPos(percent)
+
+        if (rafRef.current) cancelAnimationFrame(rafRef.current)
+        rafRef.current = requestAnimationFrame(() => {
+            setSliderPos(percent)
+        })
     }, [])
 
     const handleMouseDown = () => { isDragging.current = true }
@@ -24,6 +29,8 @@ export default function BeforeAfter() {
     }
 
     const handleTouchMove = (e) => {
+        // Prevent default only if we are taking over the touch action
+        // Actually touch-action: none on the container is better for CSS
         updatePosition(e.touches[0].clientX)
     }
 
@@ -54,7 +61,7 @@ export default function BeforeAfter() {
                 <div className="max-w-2xl mx-auto">
                     <div
                         ref={containerRef}
-                        className="relative aspect-[3/4] rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-deep-purple/30 cursor-col-resize select-none"
+                        className="relative aspect-[3/4] rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-deep-purple/30 cursor-col-resize select-none touch-none"
                         onMouseDown={handleMouseDown}
                         onMouseUp={handleMouseUp}
                         onMouseLeave={handleMouseUp}
