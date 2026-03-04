@@ -1,5 +1,5 @@
 import { MapPin, Clock, Instagram, Facebook } from 'lucide-react'
-import logoImg from '../img/logo/29e760ed-e1d4-4a3e-afff-2e1ab2a25cfc.jpeg'
+import logoImg from '../img/logo/3780b2de-e008-448f-8ee6-cc3cbee70d7a.jpeg'
 
 export default function Footer() {
     return (
@@ -13,10 +13,10 @@ export default function Footer() {
                     <div className="space-y-4">
                         <div className="flex items-center gap-3">
                             <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-electric-purple/30 shadow-lg shadow-electric-purple/20">
-                                <img src={logoImg} alt="Chamo Barber Studio Logo" className="w-full h-full object-cover" />
+                                <img src={logoImg} alt="El nica Barber Studio Logo" className="w-full h-full object-cover" />
                             </div>
                             <span className="text-white font-display font-bold text-2xl tracking-tight uppercase">
-                                CHAMO <span className="text-electric-purple">BS</span>
+                                EL NICA <span className="text-electric-purple">BS</span>
                             </span>
                         </div>
                         <p className="text-white/40 leading-relaxed">
@@ -89,10 +89,10 @@ export default function Footer() {
                 {/* Bottom bar */}
                 <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <p className="text-white/30 text-sm">
-                        © {new Date().getFullYear()} Chamo Barber Studio. Todos los derechos reservados.
+                        © {new Date().getFullYear()} El nica Barber Studio. Todos los derechos reservados.
                     </p>
                     <p className="text-white/20 text-sm">
-                        Hecho con 💜
+                        Hecho con 👑
                     </p>
                 </div>
             </div>

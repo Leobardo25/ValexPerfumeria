@@ -8,7 +8,7 @@ const navLinks = [
     { href: '#gallery', label: 'Galería' },
 ]
 
-import logoImg from '../img/logo/29e760ed-e1d4-4a3e-afff-2e1ab2a25cfc.jpeg'
+import logoImg from '../img/logo/3780b2de-e008-448f-8ee6-cc3cbee70d7a.jpeg'
 
 export default function Navbar({ menuOpen, setMenuOpen }) {
     const [scrolled, setScrolled] = useState(false)
@@ -42,10 +42,10 @@ export default function Navbar({ menuOpen, setMenuOpen }) {
                         {/* Logo */}
                         <a href="#" className="flex items-center gap-3 group">
                             <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-electric-purple/30 shadow-lg shadow-electric-purple/20 group-hover:shadow-electric-purple/40 transition-shadow duration-300">
-                                <img src={logoImg} alt="Chamo Barber Studio Logo" className="w-full h-full object-cover" />
+                                <img src={logoImg} alt="El nica Barber Studio Logo" className="w-full h-full object-cover" />
                             </div>
                             <span className="font-display font-bold text-xl tracking-tight animate-gradient-text uppercase">
-                                CHAMO BS
+                                EL NICA BS
                             </span>
                         </a>
 
@@ -94,10 +94,10 @@ export default function Navbar({ menuOpen, setMenuOpen }) {
                     <div className="flex items-center justify-between px-4 h-20 border-b border-white/5">
                         <a href="#" onClick={() => setMenuOpen(false)} className="flex items-center gap-3">
                             <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-electric-purple/30 shadow-lg shadow-electric-purple/20">
-                                <img src={logoImg} alt="Chamo Barber Studio Logo" className="w-full h-full object-cover" />
+                                <img src={logoImg} alt="El nica Barber Studio Logo" className="w-full h-full object-cover" />
                             </div>
                             <span className="font-display font-bold text-xl tracking-tight animate-gradient-text uppercase">
-                                CHAMO BS
+                                EL NICA BS
                             </span>
                         </a>
                         <button
