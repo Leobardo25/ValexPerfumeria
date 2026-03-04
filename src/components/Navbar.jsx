@@ -8,7 +8,7 @@ const navLinks = [
     { href: '#gallery', label: 'Galería' },
 ]
 
-import logoImg from '../img/logo/3780b2de-e008-448f-8ee6-cc3cbee70d7a.jpeg'
+import logoImg from '../img/logo/112d65eb-8d59-4da8-be33-a35c202589e3.jpeg'
 
 export default function Navbar({ menuOpen, setMenuOpen }) {
     const [scrolled, setScrolled] = useState(false)
@@ -33,7 +33,7 @@ export default function Navbar({ menuOpen, setMenuOpen }) {
         <>
             <nav
                 className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
-                    ? 'bg-charcoal/80 backdrop-blur-xl shadow-2xl shadow-deep-purple/10 border-b border-white/5'
+                    ? 'bg-brand-bg/95 backdrop-blur-xl shadow-2xl shadow-charcoal/10 border-b border-brand-dark'
                     : 'bg-transparent'
                     }`}
             >
@@ -41,11 +41,11 @@ export default function Navbar({ menuOpen, setMenuOpen }) {
                     <div className="flex items-center justify-between h-20">
                         {/* Logo */}
                         <a href="#" className="flex items-center gap-3 group">
-                            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-electric-purple/30 shadow-lg shadow-electric-purple/20 group-hover:shadow-electric-purple/40 transition-shadow duration-300">
-                                <img src={logoImg} alt="El nica Barber Studio Logo" className="w-full h-full object-cover" />
+                            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-brand-gold/30 shadow-lg shadow-brand-gold/20 group-hover:shadow-brand-gold/40 transition-shadow duration-300">
+                                <img src={logoImg} alt="Reckless Studio Logo" className="w-full h-full object-cover" />
                             </div>
-                            <span className="font-display font-bold text-xl tracking-tight animate-gradient-text uppercase">
-                                EL NICA BS
+                            <span className="font-display font-bold text-xl tracking-tight text-brand-beige uppercase">
+                                RECKLESS STUDIO
                             </span>
                         </a>
 
@@ -55,14 +55,14 @@ export default function Navbar({ menuOpen, setMenuOpen }) {
                                 <a
                                     key={link.href}
                                     href={link.href}
-                                    className="relative text-white/70 hover:text-white font-medium px-5 py-2 rounded-xl transition-colors duration-300 hover:bg-white/5"
+                                    className="relative text-brand-gray hover:text-brand-white font-medium px-5 py-2 rounded-xl transition-colors duration-300 hover:bg-white/5"
                                 >
                                     {link.label}
                                 </a>
                             ))}
                             <a
                                 href="#contact"
-                                className="ml-4 bg-gradient-to-r from-deep-purple to-electric-purple text-white font-semibold px-6 py-2.5 rounded-2xl shadow-lg hover:shadow-electric-purple/40 hover:shadow-xl hover:scale-105 transition-all duration-300"
+                                className="ml-4 bg-brand-gold text-brand-bg font-semibold px-6 py-2.5 rounded-2xl shadow-lg hover:shadow-brand-gold/40 hover:bg-[#A38A52] hover:shadow-xl hover:scale-105 transition-all duration-300"
                             >
                                 Cita
                             </a>
@@ -87,29 +87,29 @@ export default function Navbar({ menuOpen, setMenuOpen }) {
                     }`}
             >
                 {/* Solid background */}
-                <div className="absolute inset-0 bg-charcoal" />
+                <div className="absolute inset-0 bg-brand-bg" />
 
                 <div className="relative h-full flex flex-col">
                     {/* Header with logo + close button */}
-                    <div className="flex items-center justify-between px-4 h-20 border-b border-white/5">
+                    <div className="flex items-center justify-between px-4 h-20 border-b border-brand-dark">
                         <a href="#" onClick={() => setMenuOpen(false)} className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-electric-purple/30 shadow-lg shadow-electric-purple/20">
-                                <img src={logoImg} alt="El nica Barber Studio Logo" className="w-full h-full object-cover" />
+                            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-brand-gold/30 shadow-lg shadow-brand-gold/20">
+                                <img src={logoImg} alt="Reckless Studio Logo" className="w-full h-full object-cover" />
                             </div>
-                            <span className="font-display font-bold text-xl tracking-tight animate-gradient-text uppercase">
-                                EL NICA BS
+                            <span className="font-display font-bold text-xl tracking-tight text-brand-beige uppercase">
+                                RECKLESS STUDIO
                             </span>
                         </a>
                         <button
                             onClick={() => setMenuOpen(false)}
-                            className="text-white/70 hover:text-white p-2 rounded-xl hover:bg-white/10 transition-colors"
+                            className="text-brand-gray hover:text-brand-white p-2 rounded-xl hover:bg-white/10 transition-colors"
                         >
                             <X className="w-6 h-6" />
                         </button>
                     </div>
 
                     {/* Gradient accent line */}
-                    <div className="h-[1px] bg-gradient-to-r from-transparent via-electric-purple to-transparent" />
+                    <div className="h-[1px] bg-brand-dark" />
 
                     {/* Centered navigation links */}
                     <div className={`flex-1 flex flex-col items-center justify-center gap-8 transition-all duration-500 ${menuOpen ? 'translate-y-0 opacity-100' : '-translate-y-8 opacity-0'

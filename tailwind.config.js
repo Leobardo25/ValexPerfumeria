@@ -30,11 +30,11 @@
 
 // ⬇️ CHANGE THESE TO SWITCH THE ENTIRE THEME ⬇️
 const THEME = {
-    primary: '#B8860B',       // Dark gold
-    accent: '#D4AF37',        // Gold vibrante
-    soft: '#E6E6FA',          // Fondo claro (lavender) original
-    softAlt: '#F3F0FF',       // Fondo claro alternativo
-    dark: '#000000',          // Negro puro absoluto (Hero, Footer)
+    primary: '#A38A52',       // Dorado hover (un poco más oscuro)
+    accent: '#C6A96B',        // Dorado suave cálido (botones, íconos)
+    soft: '#1C1C1C',          // Negro secundario (secciones alternas)
+    softAlt: '#111111',       // Negro principal (fondo)
+    dark: '#111111',          // Negro principal (fondo)
 }
 
 export default {
@@ -50,6 +50,14 @@ export default {
                 'lavender': THEME.soft,
                 'lavender-soft': THEME.softAlt,
                 'charcoal': THEME.dark,
+
+                // Reckless Studio specific colors
+                'brand-bg': '#111111',
+                'brand-dark': '#1C1C1C',
+                'brand-beige': '#E6D5C3',
+                'brand-gold': '#C6A96B',
+                'brand-gray': '#B8B1A8',
+                'brand-white': '#F5F5F5',
             },
             fontFamily: {
                 sans: ['Inter', 'system-ui', 'sans-serif'],

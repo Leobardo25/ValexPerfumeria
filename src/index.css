@@ -16,10 +16,10 @@
  * ========================================
  */
 :root {
-  --primary: #B8860B;
-  --accent: #D4AF37;
-  --accent-light: #E8D48B;
-  --dark: #0F0F0F;
+  --primary: #A38A52;
+  --accent: #C6A96B;
+  --accent-light: #E0C793;
+  --dark: #111111;
 }
 
 html {
@@ -86,13 +86,13 @@ body {
 
   0%,
   100% {
-    box-shadow: 0 0 15px 3px rgba(212, 175, 55, 0.4),
-      0 0 30px 6px rgba(184, 134, 11, 0.2);
+    box-shadow: 0 0 15px 3px rgba(198, 169, 107, 0.4),
+      0 0 30px 6px rgba(163, 138, 82, 0.2);
   }
 
   50% {
-    box-shadow: 0 0 20px 6px rgba(212, 175, 55, 0.6),
-      0 0 40px 10px rgba(184, 134, 11, 0.3);
+    box-shadow: 0 0 20px 6px rgba(198, 169, 107, 0.6),
+      0 0 40px 10px rgba(163, 138, 82, 0.3);
   }
 }
 
