@@ -4,22 +4,17 @@
 
 /*
  * ========================================
- *  🎨 THEME CSS VARIABLES
- * ========================================
- *  These CSS variables match the THEME object
- *  in tailwind.config.js. Update BOTH files
- *  when changing the theme.
- *
- *  These are used for scrollbar, gradient
- *  animations, and glow effects that can't
- *  use Tailwind classes directly.
+ *  🎨 VALEX PERFUMERÍA — CSS VARIABLES
+ *  Concepto: "Lujo Silencioso"
  * ========================================
  */
 :root {
-  --primary: #A38A52;
-  --accent: #C6A96B;
-  --accent-light: #E0C793;
-  --dark: #111111;
+  --negro-mate: #1A1A1B;
+  --bronce: #A68966;
+  --bronce-dark: #8A7050;
+  --bronce-light: #C4A87D;
+  --gris-piedra: #D1D1D1;
+  --blanco-hueso: #F5F5F5;
 }
 
 html {
@@ -27,75 +22,89 @@ html {
 }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Poppins', system-ui, sans-serif;
+  background-color: var(--negro-mate);
+  color: var(--gris-piedra);
 }
 
-/* Custom thin scrollbar with theme colors */
+/* ── Scrollbar ── */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--dark);
+  background: var(--negro-mate);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--primary), var(--accent));
+  background: linear-gradient(180deg, var(--bronce), var(--bronce-dark));
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, var(--accent), var(--accent-light));
+  background: linear-gradient(180deg, var(--bronce-light), var(--bronce));
 }
 
-/* Firefox scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--accent) var(--dark);
+  scrollbar-color: var(--bronce) var(--negro-mate);
 }
 
-/* Animated gradient text for logo */
-@keyframes gradientSweep {
+/* ── Animated gradient text for VALEX logo ── */
+@keyframes bronceShimmer {
   0% {
-    background-position: 100% 50%;
+    background-position: 200% 50%;
   }
-
   100% {
-    background-position: -100% 50%;
+    background-position: -200% 50%;
   }
 }
 
-.animate-gradient-text {
-  background: linear-gradient(90deg,
-      #ffffff 0%,
-      #ffffff 30%,
-      var(--accent) 45%,
-      var(--primary) 50%,
-      var(--accent) 55%,
-      #ffffff 70%,
-      #ffffff 100%);
-  background-size: 200% auto;
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bronce) 0%,
+    var(--bronce) 35%,
+    var(--bronce-light) 48%,
+    var(--bronce-light) 52%,
+    var(--bronce) 65%,
+    var(--bronce) 100%
+  );
+  background-size: 300% auto;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: gradientSweep 6s linear infinite;
+  animation: bronceShimmer 12s linear infinite;
 }
 
-/* Floating button gradient glow */
-@keyframes glowPulse {
-
-  0%,
-  100% {
-    box-shadow: 0 0 15px 3px rgba(198, 169, 107, 0.4),
-      0 0 30px 6px rgba(163, 138, 82, 0.2);
+/* ── Subtle fade-in on scroll ── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+/* ── Floating button glow ── */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 12px 2px rgba(166, 137, 102, 0.35),
+      0 0 24px 4px rgba(166, 137, 102, 0.15);
+  }
   50% {
-    box-shadow: 0 0 20px 6px rgba(198, 169, 107, 0.6),
-      0 0 40px 10px rgba(163, 138, 82, 0.3);
+    box-shadow: 0 0 18px 4px rgba(166, 137, 102, 0.5),
+      0 0 36px 8px rgba(166, 137, 102, 0.25);
   }
 }
 
 .animate-glow-pulse {
-  animation: glowPulse 2.5s ease-in-out infinite;
+  animation: glowPulse 3s ease-in-out infinite;
 }
