@@ -108,7 +108,7 @@ function HeroCTA() {
             <a href={HERO_CONTENT.ctaHref} className="inline-flex items-center justify-center gap-2 font-sans font-semibold text-sm px-10 py-4 rounded-lg bg-valex-bronce text-valex-negro hover:bg-valex-bronce-dark shadow-lg hover:shadow-valex-bronce/30 transition-all duration-300 tracking-wide">
                 {HERO_CONTENT.cta}
             </a>
-            <a href="https://wa.me/50660286150" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 font-sans font-medium text-sm px-10 py-4 rounded-lg border border-valex-gris/20 text-valex-gris hover:text-valex-hueso hover:border-valex-gris/40 transition-all duration-300 tracking-wide">
+            <a href="https://wa.me/xxxxxxxxxx" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 font-sans font-medium text-sm px-10 py-4 rounded-lg border border-valex-gris/20 text-valex-gris hover:text-valex-hueso hover:border-valex-gris/40 transition-all duration-300 tracking-wide">
                 <FaWhatsapp className="w-5 h-5" />
                 Contactar por WhatsApp
             </a>

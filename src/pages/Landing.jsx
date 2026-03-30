@@ -35,7 +35,7 @@ export default function Landing() {
             <AnimatePresence>
                 {showFloatingBtn && !menuOpen && (
                     <motion.a
-                        href="https://wa.me/50660286150"
+                        href="https://wa.me/xxxxxxxxxx"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="fixed bottom-6 right-4 z-30 flex items-center justify-center w-14 h-14 bg-valex-bronce rounded-full animate-glow-pulse hover:scale-110 transition-transform duration-500 ease-out shadow-xl"
