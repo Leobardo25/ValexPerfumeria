@@ -66,8 +66,6 @@ export default function Navbar({ menuOpen, setMenuOpen }) {
                         <Link to="/" className="group">
                             <Logo className="text-2xl sm:text-3xl" />
                         </Link>
-
-                        {/* Desktop nav */}
                         <div className="hidden md:flex items-center gap-1">
                             {NAV_LINKS.map((link, i) => (
                                 <motion.a
