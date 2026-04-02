@@ -7,6 +7,8 @@ import { useAuth } from '../../context/AuthContext'
 import { NAV_LINKS } from '../../constants'
 import { VALEX_TRANSITION } from '../../constants/motion'
 
+import Logo from '../ui/Logo'
+
 export default function Navbar({ menuOpen, setMenuOpen }) {
     const [scrolled, setScrolled] = useState(false)
     const { currentUser, userData, logout } = useAuth()
@@ -62,9 +64,7 @@ export default function Navbar({ menuOpen, setMenuOpen }) {
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-20">
                         <Link to="/" className="group">
-                            <span className="font-serif font-bold text-2xl sm:text-3xl tracking-[0.15em] animate-shimmer">
-                                VALEX
-                            </span>
+                            <Logo className="text-2xl sm:text-3xl" />
                         </Link>
 
                         {/* Desktop nav */}
@@ -164,7 +164,7 @@ export default function Navbar({ menuOpen, setMenuOpen }) {
                         <div className="h-full flex flex-col">
                             <div className="flex items-center justify-between px-4 h-20 border-b border-valex-gris/10">
                                 <Link to="/" onClick={() => setMenuOpen(false)}>
-                                    <span className="font-serif font-bold text-2xl tracking-[0.15em]">VALEX</span>
+                                    <Logo className="text-2xl" />
                                 </Link>
                                 <button onClick={() => setMenuOpen(false)} className="text-valex-gris hover:text-valex-hueso p-2 rounded-lg" aria-label="Close menu">
                                     <X className="w-6 h-6" />

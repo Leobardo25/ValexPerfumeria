@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
+import Logo from '../components/ui/Logo';
 
 export default function AdminDashboard() {
   const { userData, logout } = useAuth();
@@ -16,8 +17,9 @@ export default function AdminDashboard() {
       {/* Sidebar - Oculto en móviles temporalmente (Requiere botón hamburguesa para admin luego) */}
       <aside className="w-64 bg-[#1e1e1f] border-r border-valex-gris/10 flex-col hidden lg:flex">
         <div className="h-20 flex items-center justify-center border-b border-valex-gris/10 relative">
-          <a href="/" className="font-serif font-bold tracking-[0.15em] text-valex-bronce text-xl hover:text-valex-hueso transition-colors">
-            VALEX ADMIN
+          <a href="/" className="flex items-baseline hover:text-valex-hueso transition-colors">
+            <Logo className="text-xl text-valex-bronce" />
+            <span className="text-xs font-sans tracking-widest text-valex-bronce ml-2 mt-1">ADMIN</span>
           </a>
         </div>
         

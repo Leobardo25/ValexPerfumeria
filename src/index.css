@@ -64,17 +64,16 @@ body {
   background: linear-gradient(
     90deg,
     var(--bronce) 0%,
-    var(--bronce) 35%,
-    var(--bronce-light) 48%,
-    var(--bronce-light) 52%,
-    var(--bronce) 65%,
+    var(--bronce) 25%,
+    var(--blanco-hueso) 50%,
+    var(--bronce) 75%,
     var(--bronce) 100%
   );
   background-size: 300% auto;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: bronceShimmer 12s linear infinite;
+  animation: bronceShimmer 5s linear infinite;
 }
 
 /* ── Subtle fade-in on scroll ── */

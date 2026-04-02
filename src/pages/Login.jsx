@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { VALEX_TRANSITION, fadeInUp } from '../constants/motion';
+import Logo from '../components/ui/Logo';
 
 export default function Login() {
   const { signInWithGoogle, userData, currentUser } = useAuth();
@@ -43,9 +44,7 @@ export default function Login() {
       >
         <motion.div variants={fadeInUp} transition={VALEX_TRANSITION} className="text-center mb-10">
           <a href="/" className="inline-block outline-none" tabIndex={-1}>
-            <span className="font-serif font-bold text-4xl tracking-[0.15em] text-valex-bronce uppercase cursor-pointer hover:text-valex-bronce-light transition-colors">
-              VALEX
-            </span>
+            <Logo className="text-4xl justify-center cursor-pointer opacity-90 hover:opacity-100 transition-opacity" />
           </a>
           <p className="mt-4 text-valex-gris/60 font-sans text-sm tracking-widest uppercase">
             Acceso Autorizado
