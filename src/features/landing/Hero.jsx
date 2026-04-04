@@ -11,7 +11,7 @@ export default function Hero() {
     const parallaxY = useParallax(sectionRef, 0.1)
 
     return (
-        <section ref={sectionRef} id="inicio" className="relative min-h-[calc(100svh-70px)] flex items-center overflow-hidden bg-valex-negro">
+        <section ref={sectionRef} id="inicio" className="relative min-h-[100svh] lg:min-h-[calc(100svh-70px)] flex items-center overflow-hidden bg-valex-negro">
             {/* Background image — mobile */}
             <div className="absolute inset-0 lg:hidden">
                 <img src={heroImg} alt="" className="w-full h-full object-cover" />
