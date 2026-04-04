@@ -352,9 +352,8 @@ const DesktopCard = ({ product }) => {
 };
 
 // ══════════════════════════════════════════════════
-//  2. TARJETA MÓVIL LISTA — 1 producto por pantalla
-//     Viewport ref: 360x800 ~ 430x932 (CSS px)
-//     Navbar + toolbar ≈ 160px → card = 100dvh - 160px
+//  2. TARJETA MÓVIL LISTA — scroll natural
+//     Imagen 4:5, info compacta y legible
 // ══════════════════════════════════════════════════
 const MobileCard = ({ product }) => {
     const navigate = useNavigate();
@@ -363,12 +362,11 @@ const MobileCard = ({ product }) => {
 
     return (
         <div 
-            className="overflow-hidden rounded-lg border border-valex-gris/10 bg-[#1e1e1f] flex flex-col cursor-pointer group"
-            style={{ height: 'calc(100dvh - 160px)' }}
+            className="overflow-hidden rounded-lg border border-valex-gris/10 bg-[#1e1e1f] cursor-pointer group"
             onClick={() => navigate(`/producto/${product.id}`)}
         >
-            {/* Imagen — ocupa todo el espacio disponible */}
-            <div className="flex-1 min-h-0 relative overflow-hidden">
+            {/* Imagen — aspect ratio 4:5 */}
+            <div className="relative aspect-[4/5] overflow-hidden">
                 {imgUrl ? (
                     <div 
                         className="w-full h-full bg-center bg-no-repeat bg-cover"
@@ -381,19 +379,19 @@ const MobileCard = ({ product }) => {
                 )}
             </div>
 
-            {/* Info — altura fija, no crece */}
-            <div className="flex-shrink-0 px-4 py-3 flex flex-col gap-1">
+            {/* Info */}
+            <div className="px-4 py-4 flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
-                    <div className="text-[10px] font-sans tracking-[0.2em] text-valex-gris uppercase">{product.category}</div>
-                    <div className="text-[10px] font-sans tracking-wide text-valex-gris/50">{product.family || ''}</div>
+                    <span className="text-[10px] font-sans tracking-[0.2em] text-valex-gris uppercase">{product.category}</span>
+                    <span className="text-[10px] font-sans tracking-wide text-valex-gris/50">{product.family || ''}</span>
                 </div>
-                <h3 className="font-serif text-valex-hueso text-lg leading-tight group-hover:text-valex-bronce transition-colors">
+                <h3 className="font-serif text-valex-hueso text-xl leading-snug group-hover:text-valex-bronce transition-colors">
                     {product.name}
                 </h3>
-                <p className="text-xs font-light text-valex-gris/50 line-clamp-2 leading-relaxed">
+                <p className="text-sm font-light text-valex-gris/60 line-clamp-3 leading-relaxed">
                     {product.description || product.notes || '—'}
                 </p>
-                <div className="flex items-center justify-between pt-2 border-t border-valex-gris/10 mt-1">
+                <div className="flex items-center justify-between pt-3 border-t border-valex-gris/10 mt-2">
                     <span className="font-sans font-semibold text-valex-bronce text-xl tracking-wide">${Number(product.price).toFixed(2)}</span>
                     <button 
                         onClick={(e) => { e.stopPropagation(); navigate(`/producto/${product.id}`); }}
@@ -437,7 +435,10 @@ const MobileCompactCard = ({ product }) => {
             <Typography.Title level={5} className="!font-serif !text-valex-hueso !mt-0 !mb-0.5 !text-xs">
                 {product.name}
             </Typography.Title>
-            <span className="font-sans font-medium text-valex-bronce text-sm">${Number(product.price).toFixed(2)}</span>
+            <div className="flex items-center justify-between">
+                <span className="font-sans font-medium text-valex-bronce text-sm">${Number(product.price).toFixed(2)}</span>
+                <span className="text-[9px] font-sans uppercase tracking-[0.15em] text-valex-bronce/70">VER</span>
+            </div>
         </Card>
     );
 };

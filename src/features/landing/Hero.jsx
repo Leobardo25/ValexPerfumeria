@@ -11,7 +11,7 @@ export default function Hero() {
     const parallaxY = useParallax(sectionRef, 0.1)
 
     return (
-        <section ref={sectionRef} id="inicio" className="relative min-h-screen flex items-center overflow-hidden bg-valex-negro">
+        <section ref={sectionRef} id="inicio" className="relative min-h-[calc(100svh-70px)] flex items-center overflow-hidden bg-valex-negro">
             {/* Background image — mobile */}
             <div className="absolute inset-0 lg:hidden">
                 <img src={heroImg} alt="" className="w-full h-full object-cover" />
@@ -30,8 +30,8 @@ export default function Hero() {
                 backgroundSize: '50px 50px'
             }} />
 
-            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 w-full">
-                <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 lg:pt-24 lg:pb-20 w-full">
+                <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
                     {/* Left content — staggered reveal */}
                     <motion.div
                         className="space-y-8"
@@ -49,14 +49,14 @@ export default function Hero() {
 
                     {/* Right side — Parallax image */}
                     <motion.div
-                        className="relative hidden lg:block"
+                        className="relative hidden lg:block max-w-md mx-auto w-full"
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ ...VALEX_SLOW, delay: 0.4 }}
                     >
                         <div className="relative">
-                            <div className="absolute -inset-6 rounded-2xl bg-gradient-to-br from-valex-bronce/15 to-valex-bronce/5 blur-2xl" />
-                            <div className="relative aspect-[3/4] rounded-2xl border border-valex-gris/10 overflow-hidden shadow-2xl">
+                            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-valex-bronce/15 to-valex-bronce/5 blur-2xl translate-x-4 translate-y-4" />
+                            <div className="relative aspect-[4/5] rounded-2xl border border-valex-gris/10 overflow-hidden shadow-2xl">
                                 <motion.img
                                     src={heroImg}
                                     alt="Frasco de perfume de lujo VALEX"
@@ -85,7 +85,7 @@ function HeroBadge() {
 
 function HeroTitle() {
     return (
-        <motion.h1 variants={heroReveal} transition={VALEX_SLOW} className="font-serif font-bold text-5xl sm:text-6xl lg:text-7xl text-valex-hueso leading-[1.1] tracking-tight">
+        <motion.h1 variants={heroReveal} transition={VALEX_SLOW} className="font-serif font-bold text-5xl lg:text-6xl text-valex-hueso leading-[1.1] tracking-tight">
             {HERO_CONTENT.title.split(' ').slice(0, 4).join(' ')}{' '}
             <span className="text-valex-bronce italic">
                 {HERO_CONTENT.title.split(' ').slice(4).join(' ')}

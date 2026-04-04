@@ -123,7 +123,7 @@ export default function Navbar({
                                                 type="text"
                                                 value={shopSearchQuery}
                                                 onChange={(e) => setShopSearchQuery(e.target.value)}
-                                                placeholder="Buscar perfume..."
+                                                placeholder="Buscar..."
                                                 className="w-full bg-transparent text-valex-hueso text-xs focus:outline-none placeholder:text-valex-gris/50"
                                                 style={{ WebkitAppearance: 'none' }}
                                             />
@@ -242,7 +242,7 @@ export default function Navbar({
                                      type="text"
                                      value={shopSearchQuery}
                                      onChange={(e) => setShopSearchQuery(e.target.value)}
-                                     placeholder="Buscar perfume..."
+                                     placeholder="Buscar..."
                                      className="w-full bg-transparent text-valex-hueso text-sm focus:outline-none placeholder:text-valex-gris/60"
                                      style={{ WebkitAppearance: 'none' }}
                                  />
