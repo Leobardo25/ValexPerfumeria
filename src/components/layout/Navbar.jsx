@@ -233,10 +233,10 @@ export default function Navbar({
                             </Link>
                         </div>
                     </div>
-                    {/* INJECT: Tienda Toolbar SOLO para Móviles (en desktop va integrado en el navbar) */}
-                    {location.pathname === '/tienda' && (
+                    {/* INJECT: Tienda Toolbar SOLO para Móviles (oculto cuando el menú hamburguesa está abierto) */}
+                    {location.pathname === '/tienda' && !menuOpen && (
                         <div className="md:hidden w-full px-4 pb-4 flex justify-center items-center gap-2 transition-all duration-300">
-                             <div className="w-full max-w-sm bg-[#151515] border border-valex-bronce/30 rounded-lg h-11 flex items-center px-4 focus-within:border-valex-bronce shadow-inner">
+                             <div className="flex-1 bg-[#151515] border border-valex-bronce/30 rounded-lg h-11 flex items-center px-4 focus-within:border-valex-bronce shadow-inner">
                                  <Search className="w-4 h-4 text-valex-gris mr-3 flex-shrink-0" />
                                  <input 
                                      type="text"
@@ -252,7 +252,7 @@ export default function Navbar({
                                      </button>
                                  )}
                              </div>
-                             
+
                              <button
                                  onClick={onToggleMobileFilters}
                                  className={`h-11 px-6 border text-[11px] sm:text-xs font-bold uppercase tracking-widest font-serif flex items-center justify-center rounded-lg transition-all duration-300 ${isFilterMenuOpen ? 'bg-valex-bronce text-valex-negro border-valex-bronce shadow-[0_0_15px_rgba(166,137,102,0.3)]' : 'bg-transparent border-valex-bronce/40 text-valex-hueso hover:text-valex-bronce hover:border-valex-bronce'}`}
@@ -271,6 +271,15 @@ export default function Navbar({
                                  </AnimatePresence>
                                  <span className="hidden sm:inline">FILTROS {hasActiveFilters && !isFilterMenuOpen && '•'}</span>
                                  <span className="sm:hidden">FILTROS {hasActiveFilters && !isFilterMenuOpen && '•'}</span>
+                             </button>
+
+                             {/* Botón vista compacta/lista (solo móvil) */}
+                             <button
+                                 onClick={() => setIsCompactView(!isCompactView)}
+                                 className="h-11 w-11 flex-shrink-0 border border-valex-bronce/40 rounded-lg flex items-center justify-center text-valex-hueso hover:text-valex-bronce hover:border-valex-bronce transition-all duration-300"
+                                 aria-label="Cambiar vista"
+                             >
+                                 {isCompactView ? <AlignJustify className="w-4 h-4" /> : <LayoutGrid className="w-4 h-4" />}
                              </button>
                         </div>
                     )}
@@ -312,26 +321,19 @@ export default function Navbar({
             <AnimatePresence>
                 {menuOpen && (
                     <motion.div
-                        className="md:hidden fixed inset-0 z-40 bg-valex-negro"
+                        className="md:hidden fixed inset-0 z-[100] bg-valex-negro"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
                     >
                         <div className="h-full flex flex-col">
-                            <div className="flex items-center justify-between px-4 h-20 border-b border-valex-gris/10 relative">
-                                <div className="flex items-center">
-                                    <button onClick={() => setMenuOpen(false)} className="text-valex-gris hover:text-valex-hueso p-2 -ml-2 rounded-lg" aria-label="Close menu">
-                                        <X className="w-6 h-6" />
-                                    </button>
-                                </div>
-                                <div className="absolute left-1/2 -translate-x-1/2 mt-1">
-                                    <Link to="/" onClick={() => setMenuOpen(false)}>
-                                        <Logo className="text-[1.3rem]" />
-                                    </Link>
-                                </div>
+                            {/* Solo botón de cerrar */}
+                            <div className="flex justify-end px-4 pt-5">
+                                <button onClick={() => setMenuOpen(false)} className="text-valex-gris hover:text-valex-hueso p-2 rounded-lg transition-colors" aria-label="Cerrar menú">
+                                    <X className="w-7 h-7" />
+                                </button>
                             </div>
-                            <div className="h-[1px] bg-valex-bronce/20" />
                             
                             <div className="flex-1 flex flex-col items-center justify-center pb-20 gap-8 overflow-y-auto">
                                 {/* Nav Links */}
@@ -345,7 +347,7 @@ export default function Navbar({
                                         onClick={() => setMenuOpen(false)}
                                         className="text-valex-bronce font-serif font-medium text-4xl tracking-widest uppercase transition-colors duration-300 filter drop-shadow-[0_0_10px_rgba(166,137,102,0.4)]"
                                     >
-                                        LA BOUTIQUE
+                                        Ir a Tienda
                                     </Link>
                                 </motion.div>
                                 {NAV_LINKS.map((link, i) => (

@@ -39,6 +39,9 @@ export default function Shop() {
     const [filterPrice, setFilterPrice] = useState(() => JSON.parse(sessionStorage.getItem('valex_price') || '[0, 300]')); // Max price assumed $300
     const [searchQuery, setSearchQuery] = useState(() => sessionStorage.getItem('valex_search') || '');
 
+    // Scroll al tope al entrar a la tienda
+    useEffect(() => { window.scrollTo(0, 0); }, []);
+
     // Mantener estado local para no perder la navegación
     useEffect(() => {
         sessionStorage.setItem('valex_isCompactView', JSON.stringify(isCompactView));
@@ -241,32 +244,48 @@ export default function Shop() {
                                         </Button>
                                     </div>
                                 ) : (
-                                    <Row gutter={[24, 32]}>
-                                        {filteredProducts.map(product => (
-                                            <Col xs={isCompactView ? 12 : 24} sm={12} md={8} lg={6} key={product.id} className="transition-all duration-300">
-                                                <motion.div 
-                                                    layout 
-                                                    initial={{ opacity: 0, scale: 0.95 }} 
-                                                    animate={{ opacity: 1, scale: 1 }} 
-                                                    transition={{ duration: 0.35, ease: "easeInOut" }}
-                                                    className="h-full"
-                                                >
-                                                    {product.stock === 'Agotado' || product.stock === 0 ? (
-                                                        <Badge.Ribbon text="Agotado" color="volcano">
-                                                            <ProductCard product={product} onAdd={handleAddToCart} isCompactView={isCompactView} />
-                                                        </Badge.Ribbon>
-                                                    ) : (
-                                                        // Destacados Badge si se desea
-                                                        product.isFeatured ? (
-                                                             <Badge.Ribbon text="Destacado" color="#A68966">
-                                                                <ProductCard product={product} onAdd={handleAddToCart} isCompactView={isCompactView} />
-                                                             </Badge.Ribbon>
-                                                        ) : <ProductCard product={product} onAdd={handleAddToCart} isCompactView={isCompactView} />
-                                                    )}
+                                    <>
+                                        {/* ── VISTA PC (hidden en móvil) ── */}
+                                        <div className="hidden md:block">
+                                            <Row gutter={[24, 32]}>
+                                                {filteredProducts.map(product => (
+                                                    <Col md={8} lg={6} key={product.id}>
+                                                        <motion.div layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.35 }} className="h-full">
+                                                            <CardBadgeWrap product={product}>
+                                                                <DesktopCard product={product} />
+                                                            </CardBadgeWrap>
+                                                        </motion.div>
+                                                    </Col>
+                                                ))}
+                                            </Row>
+                                        </div>
+
+                                        {/* ── VISTA MÓVIL LISTA (hidden en PC, hidden si compactView) ── */}
+                                        <div className={`md:hidden ${isCompactView ? 'hidden' : 'flex flex-col gap-6'}`}>
+                                            {filteredProducts.map(product => (
+                                                <motion.div key={product.id} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
+                                                    <CardBadgeWrap product={product}>
+                                                        <MobileCard product={product} />
+                                                    </CardBadgeWrap>
                                                 </motion.div>
-                                            </Col>
-                                        ))}
-                                    </Row>
+                                            ))}
+                                        </div>
+
+                                        {/* ── VISTA MÓVIL CUADRÍCULA (hidden en PC, hidden si NO compactView) ── */}
+                                        <div className={`md:hidden ${isCompactView ? 'block' : 'hidden'}`}>
+                                            <Row gutter={[12, 16]}>
+                                                {filteredProducts.map(product => (
+                                                    <Col xs={12} key={product.id}>
+                                                        <motion.div layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.35 }} className="h-full">
+                                                            <CardBadgeWrap product={product}>
+                                                                <MobileCompactCard product={product} />
+                                                            </CardBadgeWrap>
+                                                        </motion.div>
+                                                    </Col>
+                                                ))}
+                                            </Row>
+                                        </div>
+                                    </>
                                 )}
                             </section>
                         </div>
@@ -276,10 +295,24 @@ export default function Shop() {
     );
 }
 
-// Sub-componente de Tarjeta
-const ProductCard = ({ product, onAdd, isCompactView }) => {
+// ── Wrapper para Badge (Agotado / Destacado) ──
+const CardBadgeWrap = ({ product, children }) => {
+    if (product.stock === 'Agotado' || product.stock === 0) {
+        return <Badge.Ribbon text="Agotado" color="volcano">{children}</Badge.Ribbon>;
+    }
+    if (product.isFeatured) {
+        return <Badge.Ribbon text="Destacado" color="#A68966">{children}</Badge.Ribbon>;
+    }
+    return children;
+};
+
+// ══════════════════════════════════════════════════
+//  1. TARJETA PC (Desktop) — 4 columnas, compacta
+// ══════════════════════════════════════════════════
+const DesktopCard = ({ product }) => {
     const navigate = useNavigate();
     const isOutOfStock = product.stock === 'Agotado' || product.stock === 0;
+    const imgUrl = product.coverImage || product.imageUrl;
 
     return (
         <Card
@@ -288,13 +321,10 @@ const ProductCard = ({ product, onAdd, isCompactView }) => {
             className="overflow-hidden border-valex-gris/10 group bg-[#1e1e1f] h-full flex flex-col transition-all duration-500 hover:border-valex-bronce/30 shadow-none hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)] cursor-pointer"
             cover={
                 <div className="relative aspect-square overflow-hidden bg-transparent">
-                    {(product.coverImage || product.imageUrl) ? (
+                    {imgUrl ? (
                         <div 
                             className="w-full h-full bg-center bg-no-repeat bg-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105"
-                            style={{ 
-                                backgroundImage: `url(${product.coverImage || product.imageUrl})`,
-                                filter: isOutOfStock ? 'grayscale(100%) opacity(70%)' : 'none'
-                             }}
+                            style={{ backgroundImage: `url(${imgUrl})`, filter: isOutOfStock ? 'grayscale(100%) opacity(70%)' : 'none' }}
                         />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center bg-valex-negro">
@@ -305,27 +335,109 @@ const ProductCard = ({ product, onAdd, isCompactView }) => {
             }
             bodyStyle={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '12px 16px' }}
         >
-            <div className="text-[10px] font-sans tracking-[0.2em] text-valex-gris uppercase mb-0.5">
-                {product.category}
-            </div>
+            <div className="text-[10px] font-sans tracking-[0.2em] text-valex-gris uppercase mb-0.5">{product.category}</div>
             <Typography.Title level={5} className="!font-serif !text-valex-hueso !mt-0 !mb-0.5 group-hover:!text-valex-bronce transition-colors !text-sm lg:!text-base">
                 {product.name}
             </Typography.Title>
-            <div className="text-[11px] text-valex-gris/60 font-sans tracking-wide mb-2">
-                {product.family || '—'}
-            </div>
-            
+            <div className="text-[11px] text-valex-gris/60 font-sans tracking-wide mb-2">{product.family || '—'}</div>
             <div className="mt-auto flex items-center justify-between pt-2 border-t border-valex-gris/10">
-                <span className="font-sans font-medium text-valex-bronce text-base tracking-wide">
-                    ${Number(product.price).toFixed(2)}
-                </span>
+                <span className="font-sans font-medium text-valex-bronce text-base tracking-wide">${Number(product.price).toFixed(2)}</span>
                 <button 
                     onClick={(e) => { e.stopPropagation(); navigate(`/producto/${product.id}`); }}
                     className="text-[10px] font-sans uppercase tracking-[0.2em] text-valex-bronce hover:text-valex-hueso transition-all duration-300 border-b border-valex-bronce/30 hover:border-valex-hueso pb-0.5"
-                >
-                    VER
-                </button>
+                >VER</button>
             </div>
+        </Card>
+    );
+};
+
+// ══════════════════════════════════════════════════
+//  2. TARJETA MÓVIL LISTA — 1 producto por pantalla
+//     Viewport ref: 360x800 ~ 430x932 (CSS px)
+//     Navbar + toolbar ≈ 160px → card = 100dvh - 160px
+// ══════════════════════════════════════════════════
+const MobileCard = ({ product }) => {
+    const navigate = useNavigate();
+    const isOutOfStock = product.stock === 'Agotado' || product.stock === 0;
+    const imgUrl = product.coverImage || product.imageUrl;
+
+    return (
+        <div 
+            className="overflow-hidden rounded-lg border border-valex-gris/10 bg-[#1e1e1f] flex flex-col cursor-pointer group"
+            style={{ height: 'calc(100dvh - 160px)' }}
+            onClick={() => navigate(`/producto/${product.id}`)}
+        >
+            {/* Imagen — ocupa todo el espacio disponible */}
+            <div className="flex-1 min-h-0 relative overflow-hidden">
+                {imgUrl ? (
+                    <div 
+                        className="w-full h-full bg-center bg-no-repeat bg-cover"
+                        style={{ backgroundImage: `url(${imgUrl})`, filter: isOutOfStock ? 'grayscale(100%) opacity(70%)' : 'none' }}
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-valex-negro">
+                        <span className="text-valex-gris/30 font-serif italic text-sm">Sin imagen</span>
+                    </div>
+                )}
+            </div>
+
+            {/* Info — altura fija, no crece */}
+            <div className="flex-shrink-0 px-4 py-3 flex flex-col gap-1">
+                <div className="flex items-center justify-between">
+                    <div className="text-[10px] font-sans tracking-[0.2em] text-valex-gris uppercase">{product.category}</div>
+                    <div className="text-[10px] font-sans tracking-wide text-valex-gris/50">{product.family || ''}</div>
+                </div>
+                <h3 className="font-serif text-valex-hueso text-lg leading-tight group-hover:text-valex-bronce transition-colors">
+                    {product.name}
+                </h3>
+                <p className="text-xs font-light text-valex-gris/50 line-clamp-2 leading-relaxed">
+                    {product.description || product.notes || '—'}
+                </p>
+                <div className="flex items-center justify-between pt-2 border-t border-valex-gris/10 mt-1">
+                    <span className="font-sans font-semibold text-valex-bronce text-xl tracking-wide">${Number(product.price).toFixed(2)}</span>
+                    <button 
+                        onClick={(e) => { e.stopPropagation(); navigate(`/producto/${product.id}`); }}
+                        className="text-xs font-serif uppercase tracking-[0.15em] text-valex-negro bg-valex-bronce px-4 py-1.5 rounded hover:bg-valex-hueso transition-all duration-300"
+                    >VER DETALLES</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// ══════════════════════════════════════════════════
+//  3. TARJETA MÓVIL CUADRÍCULA — 2 columnas, mini
+// ══════════════════════════════════════════════════
+const MobileCompactCard = ({ product }) => {
+    const navigate = useNavigate();
+    const isOutOfStock = product.stock === 'Agotado' || product.stock === 0;
+    const imgUrl = product.coverImage || product.imageUrl;
+
+    return (
+        <Card
+            hoverable
+            onClick={() => navigate(`/producto/${product.id}`)}
+            className="overflow-hidden border-valex-gris/10 group bg-[#1e1e1f] h-full flex flex-col shadow-none cursor-pointer"
+            cover={
+                <div className="relative aspect-square overflow-hidden bg-transparent">
+                    {imgUrl ? (
+                        <div 
+                            className="w-full h-full bg-center bg-no-repeat bg-cover"
+                            style={{ backgroundImage: `url(${imgUrl})`, filter: isOutOfStock ? 'grayscale(100%) opacity(70%)' : 'none' }}
+                        />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-valex-negro">
+                            <span className="text-valex-gris/30 font-serif italic text-xs">Sin imagen</span>
+                        </div>
+                    )}
+                </div>
+            }
+            bodyStyle={{ padding: '8px 10px' }}
+        >
+            <Typography.Title level={5} className="!font-serif !text-valex-hueso !mt-0 !mb-0.5 !text-xs">
+                {product.name}
+            </Typography.Title>
+            <span className="font-sans font-medium text-valex-bronce text-sm">${Number(product.price).toFixed(2)}</span>
         </Card>
     );
 };
