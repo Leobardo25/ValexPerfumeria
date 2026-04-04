@@ -7,10 +7,12 @@ import { ProtectedRoute, AdminRoute, PublicOnlyRoute } from './routes/ProtectedR
 // Pages & Components Custom
 import Landing from './pages/Landing';
 import Shop from './pages/Shop';
+import ProductDetail from './pages/ProductDetail';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import InventoryList from './features/admin/InventoryList';
 import ProductForm from './features/admin/ProductForm';
+import SeedProducts from './pages/SeedProducts';
 
 function AppRoutes() {
   return (
@@ -18,6 +20,8 @@ function AppRoutes() {
       {/* 1. Public Store & Landing Pages */}
       <Route path="/" element={<Landing />} />
       <Route path="/tienda" element={<Shop />} />
+      <Route path="/producto/:id" element={<ProductDetail />} />
+      <Route path="/seed" element={<SeedProducts />} />
 
       {/* 2. Authentication Pages (blocked if logged in) */}
       <Route element={<PublicOnlyRoute />}>
@@ -45,6 +49,8 @@ function AppRoutes() {
   );
 }
 
+import { CartProvider } from './context/CartContext';
+import CartDrawer from './components/ui/CartDrawer';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -52,14 +58,17 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
-        <ToastContainer 
-          position="top-center" 
-          autoClose={3000} 
-          hideProgressBar={false} 
-          theme="dark" 
-          toastClassName="bg-[#1e1e1f] text-valex-hueso border border-valex-bronce/30 font-sans"
-        />
+        <CartProvider>
+          <AppRoutes />
+          <CartDrawer />
+          <ToastContainer 
+            position="top-center" 
+            autoClose={3000} 
+            hideProgressBar={false} 
+            theme="dark" 
+            toastClassName="bg-[#1e1e1f] text-valex-hueso border border-valex-bronce/30 font-sans"
+          />
+        </CartProvider>
       </AuthProvider>
     </BrowserRouter>
   );

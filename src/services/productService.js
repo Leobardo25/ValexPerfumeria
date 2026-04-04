@@ -35,26 +35,41 @@ export const getProductById = async (id) => {
 };
 
 /**
- * Crea un producto nuevo, subiendo la imagen si existe
+ * Crea un producto nuevo, subiendo la imagen principal y las imágenes de galería si existen
  */
-export const createProduct = async (productData, imageFile) => {
+export const createProduct = async (productData, coverFile, galleryFiles = []) => {
     try {
-        let imageUrl = '';
-        if (imageFile) {
-            // Sube a la carpeta 'products/'
-            const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
-            const snapshot = await uploadBytes(storageRef, imageFile);
-            imageUrl = await getDownloadURL(snapshot.ref);
+        let coverImage = '';
+        let galleryImages = [];
+
+        // 1. Subir Portada Principal
+        if (coverFile) {
+            const coverRef = ref(storage, `products/${Date.now()}_cover_${coverFile.name}`);
+            const snapshot = await uploadBytes(coverRef, coverFile);
+            coverImage = await getDownloadURL(snapshot.ref);
         }
 
-        const newDocRef = await addDoc(collection(db, COLLECTION_NAME), {
+        // 2. Subir Imágenes de Galería Concurrente
+        if (galleryFiles && galleryFiles.length > 0) {
+            const uploadPromises = galleryFiles.map(async (file, index) => {
+                const galRef = ref(storage, `products/${Date.now()}_gal${index}_${file.name}`);
+                const snap = await uploadBytes(galRef, file);
+                return getDownloadURL(snap.ref);
+            });
+            galleryImages = await Promise.all(uploadPromises);
+        }
+
+        const finalProductData = {
             ...productData,
-            imageUrl,
+            coverImage,
+            galleryImages,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
-        });
+        };
+
+        const newDocRef = await addDoc(collection(db, COLLECTION_NAME), finalProductData);
         
-        return { id: newDocRef.id, ...productData, imageUrl };
+        return { id: newDocRef.id, ...finalProductData };
     } catch (error) {
         console.error("Error creando producto:", error);
         throw error;
@@ -64,28 +79,40 @@ export const createProduct = async (productData, imageFile) => {
 /**
  * Actualiza un producto existente, y si hay imagen nueva, la sube.
  */
-export const updateProduct = async (id, updatedData, newImageFile = null, oldImageUrl = null) => {
+export const updateProduct = async (id, productData, newCoverFile, currentCoverUrl, newGalleryFiles = [], currentGalleryUrls = []) => {
     try {
-        let imageUrl = oldImageUrl; // Mantener la vieja por defecto
-        
-        if (newImageFile) {
-            // Subir nueva
-            const storageRef = ref(storage, `products/${Date.now()}_${newImageFile.name}`);
-            const snapshot = await uploadBytes(storageRef, newImageFile);
-            imageUrl = await getDownloadURL(snapshot.ref);
-            
-            // Nota: Aquí se podría intentar borrar la imagen anterior (opcional para ahorrar espacio)
-            // deleteObject(ref(storage, oldImageUrl)).catch(err => console.log('Error borrando imagen vieja', err));
+        const docRef = doc(db, COLLECTION_NAME, id);
+        let coverImage = currentCoverUrl || '';
+        let galleryImages = [...(currentGalleryUrls || [])]; // Mantenemos las previas inicialmente
+
+        // 1. Si hay nueva Portada, la subimos y reemplaza la vieja
+        if (newCoverFile) {
+            const coverRef = ref(storage, `products/${Date.now()}_cover_${newCoverFile.name}`);
+            const snapshot = await uploadBytes(coverRef, newCoverFile);
+            coverImage = await getDownloadURL(snapshot.ref);
         }
 
-        const docRef = doc(db, COLLECTION_NAME, id);
-        await updateDoc(docRef, {
-            ...updatedData,
-            imageUrl,
-            updatedAt: serverTimestamp()
-        });
+        // 2. Si se subieron nuevas imágenes para la galería, las añadimos
+        if (newGalleryFiles && newGalleryFiles.length > 0) {
+            const uploadPromises = newGalleryFiles.map(async (file, index) => {
+                const galRef = ref(storage, `products/${Date.now()}_gal${index}_${file.name}`);
+                const snap = await uploadBytes(galRef, file);
+                return getDownloadURL(snap.ref);
+            });
+            const newUrls = await Promise.all(uploadPromises);
+            // Concatenamos las nuevas a las existentes (o podríamos reemplazarlas dependiendo de la UI)
+            galleryImages = [...galleryImages, ...newUrls];
+        }
 
-        return { id, ...updatedData, imageUrl };
+        const updatePayload = {
+            ...productData,
+            coverImage,
+            galleryImages,
+            updatedAt: serverTimestamp()
+        };
+
+        await updateDoc(docRef, updatePayload);
+        return { id, ...updatePayload };
     } catch (error) {
         console.error(`Error actualizando producto ${id}:`, error);
         throw error;

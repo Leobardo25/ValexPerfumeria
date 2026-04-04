@@ -15,6 +15,7 @@ export default function ProductForm() {
     const [formData, setFormData] = useState({
         name: '',
         category: 'Unisex',
+        family: 'Amaderado', // Familia olfativa base
         notes: '',
         description: '',
         price: '',
@@ -22,9 +23,16 @@ export default function ProductForm() {
         isFeatured: false
     });
     
-    // Manejo de imagen física
-    const [imageFile, setImageFile] = useState(null);
-    const [imagePreview, setImagePreview] = useState(null); // URL vieja mostrada como preview
+    // Manejo de imágenes (Portada y Galería)
+    const [coverFile, setCoverFile] = useState(null);
+    const [coverPreview, setCoverPreview] = useState(null); // URL vieja mostrada como preview de portada
+
+    const [galleryFiles, setGalleryFiles] = useState([]);
+    const [galleryPreviews, setGalleryPreviews] = useState([]); 
+    const [oldGalleryUrls, setOldGalleryUrls] = useState([]); // Mantener estado de las imágenes viejas de la nube
+
+    // Familias Olfativas disponibles (Misma que en la tienda)
+    const FAMILIES = ['Amaderado', 'Floral', 'Cítrico', 'Dulce', 'Acuático', 'Oriental', 'Cuero'];
 
     // Si es edición, cargar el producto por ID al montar
     useEffect(() => {
@@ -36,14 +44,23 @@ export default function ProductForm() {
                         setFormData({
                             name: data.name || '',
                             category: data.category || 'Unisex',
+                            family: data.family || 'Amaderado',
                             notes: data.notes || '',
                             description: data.description || '',
                             price: data.price || '',
                             stock: data.stock || 'Disponible',
                             isFeatured: data.isFeatured || false
                         });
-                        if (data.imageUrl) {
-                            setImagePreview(data.imageUrl);
+                        
+                        // Cargar portada principal
+                        if (data.coverImage || data.imageUrl) {
+                            setCoverPreview(data.coverImage || data.imageUrl);
+                        }
+                        
+                        // Cargar galería preexistente
+                        if (data.galleryImages && Array.isArray(data.galleryImages)) {
+                            setOldGalleryUrls(data.galleryImages);
+                            setGalleryPreviews(data.galleryImages);
                         }
                     } else {
                         toast.error('Producto no encontrado en la base de datos');
@@ -68,14 +85,32 @@ export default function ProductForm() {
         }));
     };
 
-    // Manejador de selección de imagen
-    const handleImageChange = (e) => {
+    // Manejador Portada Principal
+    const handleCoverChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setImageFile(file);
-            // Mostrar una URL local para preview
-            setImagePreview(URL.createObjectURL(file));
+            setCoverFile(file);
+            setCoverPreview(URL.createObjectURL(file));
         }
+    };
+
+    // Manejador Galería Múltiple
+    const handleGalleryChange = (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length > 0) {
+            // Unir a archivos nuevos en estado (para subida)
+            setGalleryFiles(prev => [...prev, ...files]);
+            
+            // Generar previsualizaciones de las nuevas subidas para la interfaz
+            const newPreviews = files.map(file => URL.createObjectURL(file));
+            setGalleryPreviews(prev => [...prev, ...newPreviews]);
+        }
+    };
+
+    // Remover imagen de galería por índice temporal
+    const removeGalleryPreview = (index) => {
+        // Lógica de UI básica: remueve la previsualización por índice. No purga los Files físicamente en esta iteración.
+        setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
     };
 
     // Enviar el formulario a Base de datos (Crear o Actualizar)
@@ -84,20 +119,19 @@ export default function ProductForm() {
         
         // Validaciones básicas
         if (!formData.name) return toast.warn("Por favor añade un nombre.");
-        if (!isEditMode && !imageFile && !imagePreview) return toast.warn("Por favor sube una imagen del perfume.");
+        if (!isEditMode && !coverFile && !coverPreview) return toast.warn("Sube al menos la Imagen de Portada Principal.");
 
         try {
             setIsLoading(true);
-            // Forzar precio a número si existe
             const cleanData = { ...formData, price: Number(formData.price) || 0 };
 
             if (isEditMode) {
-                // Actualizando (Pasando old image preview URL por si no hay foto nueva)
-                await updateProduct(id, cleanData, imageFile, imagePreview);
+                // oldGalleryUrls is sent so the backend merges previous gallery with new ones.
+                await updateProduct(id, cleanData, coverFile, coverPreview, galleryFiles, oldGalleryUrls);
                 toast.success('¡Perfume actualizado con éxito!');
             } else {
                 // Creando nuevo
-                await createProduct(cleanData, imageFile);
+                await createProduct(cleanData, coverFile, galleryFiles);
                 toast.success('¡Perfume añadido al catálogo!');
             }
             navigate('/admin/inventory');
@@ -161,6 +195,16 @@ export default function ProductForm() {
                         </select>
                     </div>
 
+                    {/* Familia Olfativa */}
+                    <div className="space-y-2 md:col-span-2">
+                        <label className="text-valex-gris text-sm font-medium">Familia Olfativa Principal</label>
+                        <select name="family" value={formData.family} onChange={handleChange} className="w-full bg-valex-negro border border-valex-gris/20 text-valex-hueso rounded-lg px-4 py-3 focus:outline-none focus:border-valex-bronce transition-colors">
+                            {FAMILIES.map(fam => (
+                                <option key={fam} value={fam}>{fam}</option>
+                            ))}
+                        </select>
+                    </div>
+
                     {/* Notas (Acordes) */}
                     <div className="space-y-2 md:col-span-2">
                         <label className="text-valex-gris text-sm font-medium">Notas Olfativas Principales</label>
@@ -192,26 +236,71 @@ export default function ProductForm() {
                         </select>
                     </div>
 
-                    {/* Selector de Imagen con Previsualización estilo Lujo */}
-                    <div className="space-y-2 md:col-span-2 mt-4">
-                        <label className="text-valex-gris text-sm font-medium">Fotografía Cúbica (Botella)</label>
-                        <div className="flex flex-col sm:flex-row items-center gap-6 mt-2">
-                            <div className="w-32 h-40 bg-valex-negro border-2 border-dashed border-valex-gris/20 rounded-xl overflow-hidden flex items-center justify-center shrink-0">
-                                {imagePreview ? (
-                                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                                ) : (
-                                    <span className="text-valex-gris/40 text-xs">Sin Foto</span>
-                                )}
+                    {/* Sección Multimedia (Portada y Galería) */}
+                    <div className="space-y-6 md:col-span-2 mt-4 pt-6 border-t border-valex-gris/10">
+                        <h3 className="text-lg font-serif text-valex-hueso">Archivos Multimedia</h3>
+                        
+                        {/* Imagen Principal (Portada) */}
+                        <div className="bg-valex-negro/50 p-6 rounded-xl border border-valex-gris/10">
+                            <label className="text-valex-gris text-sm font-medium mb-3 block">Imagen de Portada Principal *</label>
+                            <div className="flex flex-col sm:flex-row items-center gap-6">
+                                <div className="w-32 h-40 bg-valex-negro border-2 border-dashed border-valex-gris/20 rounded-xl overflow-hidden flex items-center justify-center shrink-0">
+                                    {coverPreview ? (
+                                        <img src={coverPreview} alt="Cover Preview" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span className="text-valex-gris/40 text-xs text-center px-2">Sin Portada</span>
+                                    )}
+                                </div>
+                                <div className="flex-1 w-full">
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        onChange={handleCoverChange}
+                                        className="block w-full text-sm text-valex-gris file:mr-4 file:py-3 file:px-6 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-valex-bronce file:text-valex-negro hover:file:bg-valex-bronce/90 file:cursor-pointer transition-all"
+                                    />
+                                    <p className="text-xs text-valex-gris mt-2">Ésta imagen aparecerá en la página principal y búsquedas.</p>
+                                </div>
                             </div>
-                            <div className="flex-1 w-full">
+                        </div>
+
+                        {/* Imágenes de Galería Múltiple */}
+                        <div className="bg-valex-negro/50 p-6 rounded-xl border border-valex-gris/10">
+                            <label className="text-valex-gris text-sm font-medium mb-3 block">Imágenes de la Galería (Carrusel de Detalles)</label>
+                            
+                            <div className="flex-1 w-full mb-6">
                                 <input 
                                     type="file" 
                                     accept="image/*" 
-                                    onChange={handleImageChange}
-                                    className="block w-full text-sm text-valex-gris file:mr-4 file:py-3 file:px-6 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-valex-bronce file:text-valex-negro hover:file:bg-valex-bronce/90 file:cursor-pointer transition-all"
+                                    multiple
+                                    onChange={handleGalleryChange}
+                                    className="block w-full text-sm text-valex-gris file:mr-4 file:py-3 file:px-6 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#333] file:text-valex-hueso hover:file:bg-valex-gris/20 file:cursor-pointer transition-all"
                                 />
-                                <p className="text-xs text-valex-gris mt-2">Formatos preferidos: WebP, PNG, JPG (Recomendado foto con fondo oscuro).</p>
+                                <p className="text-xs text-valex-gris mt-2">Puedes seleccionar múltiples archivos a la vez. Aparecerán listadas abajo.</p>
                             </div>
+
+                            {/* Previsualización en mini-cuadrícula */}
+                            {galleryPreviews.length > 0 && (
+                                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                                    {galleryPreviews.map((previewSrc, index) => (
+                                        <div key={index} className="relative aspect-[3/4] bg-valex-negro border border-valex-gris/20 rounded-lg overflow-hidden group">
+                                            <img src={previewSrc} alt={`Gallery Preview ${index}`} className="w-full h-full object-cover" />
+                                            {/* Nota: Lógica simple de borrado para el preview visual */}
+                                            <button 
+                                                type="button" 
+                                                onClick={() => removeGalleryPreview(index)}
+                                                className="absolute top-1 right-1 bg-red-500/80 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            {galleryPreviews.length === 0 && (
+                                <div className="w-full py-8 border-2 border-dashed border-valex-gris/20 rounded-xl flex items-center justify-center">
+                                    <span className="text-valex-gris/40 text-sm">Sin imágenes en la galería</span>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
