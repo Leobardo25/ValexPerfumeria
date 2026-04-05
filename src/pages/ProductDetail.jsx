@@ -73,7 +73,7 @@ export default function ProductDetail() {
             <div className="min-h-screen bg-valex-negro flex flex-col">
                 <Navbar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
-                <Content className="flex-1 pt-[100px] lg:pt-[140px] px-4 sm:px-6 lg:px-8 max-w-[1400px] w-full mx-auto pb-24">
+                <Content className="flex-1 pt-[80px] lg:pt-[110px] px-4 sm:px-6 lg:px-8 max-w-[1400px] w-full mx-auto pb-24">
                     {/* BREADCRUMB */}
                     <Breadcrumb 
                         separator=">" 
@@ -87,7 +87,7 @@ export default function ProductDetail() {
                     {/* Botón Móvil Atrás */}
                     <button 
                         onClick={() => navigate(-1)} 
-                        className="md:hidden flex items-center text-valex-gris mb-6 hover:text-valex-hueso"
+                        className="md:hidden flex items-center text-valex-gris mb-3 hover:text-valex-hueso text-sm"
                     >
                         <LeftOutlined className="mr-2" /> Volver
                     </button>
@@ -98,8 +98,8 @@ export default function ProductDetail() {
                             <div className="h-12 bg-valex-gris/10 w-3/4 mx-auto md:w-2/3 rounded" />
                         </div>
                     ) : (
-                        <div className="text-center mb-10 w-full max-w-3xl mx-auto transition-opacity duration-700">
-                            <Title level={1} className="!font-serif !text-4xl lg:!text-5xl !text-valex-hueso !mb-0 !font-normal !tracking-tight mx-auto max-w-2xl px-2">
+                        <div className="text-center mb-4 md:mb-10 w-full max-w-3xl mx-auto transition-opacity duration-700">
+                            <Title level={1} className="!font-serif !text-3xl sm:!text-4xl lg:!text-5xl !text-valex-hueso !mb-0 !font-normal !tracking-tight mx-auto max-w-2xl px-2">
                                 {product.name}
                             </Title>
                         </div>
@@ -109,7 +109,7 @@ export default function ProductDetail() {
                         <Row gutter={[48, 48]}>
                             <Col xs={24} md={11} lg={12}>
                                 {/* Skeleton idéntico para evitar "layout shift" o "flash", sin pulse agresivo */}
-                                <div className="aspect-[3/4] md:aspect-square bg-transparent border border-valex-gris/10 flex items-center justify-center">
+                                <div className="aspect-square bg-transparent border border-valex-gris/10 flex items-center justify-center">
                                     <div className="w-8 h-8 rounded-full border-2 border-valex-bronce/30 border-t-valex-bronce animate-spin" />
                                 </div>
                             </Col>
@@ -119,11 +119,11 @@ export default function ProductDetail() {
                             </Col>
                         </Row>
                     ) : (
-                        <Row gutter={[48, 48]} className="items-start transition-opacity duration-700">
+                        <Row gutter={[{ xs: 0, md: 48 }, { xs: 24, md: 48 }]} className="items-start transition-opacity duration-700">
                             {/* COLUMNA IZQUIERDA: GALERÍA CARUSEL */}
                             <Col xs={24} md={11} lg={12}>
                                 <div className="sticky top-24">
-                                    <div className="aspect-[3/4] md:aspect-square bg-transparent relative border border-valex-gris/10 overflow-hidden group rounded-sm">
+                                    <div className="aspect-square bg-transparent relative border border-valex-gris/10 overflow-hidden group rounded-sm">
                                         <img 
                                             src={images[currentImageIndex]} 
                                             alt={product.name} 
@@ -185,19 +185,19 @@ export default function ProductDetail() {
                             {/* COLUMNA DERECHA: INFO DE COMPRA */}
                             <Col xs={24} md={13} lg={12}>
                                 <div className="flex flex-col h-full pl-0 md:pl-4 pt-4 md:pt-0">
-                                    <Text className="uppercase tracking-[0.3em] text-valex-gris text-xs font-semibold mb-4 block">
+                                    <Text className="uppercase tracking-[0.3em] text-valex-gris text-[10px] md:text-xs font-semibold mb-2 block">
                                         {product.category}
                                     </Text>
                                     
                                     {/* Social Proof Mock */}
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="flex text-valex-bronce text-sm">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="flex text-valex-bronce text-xs md:text-sm">
                                             <StarFilled /><StarFilled /><StarFilled /><StarFilled /><StarFilled />
                                         </div>
-                                        <Text className="text-valex-gris text-sm underline cursor-pointer">4.9/5 (128 Reseñas)</Text>
+                                        <Text className="text-valex-gris text-xs md:text-sm underline cursor-pointer">4.9/5 (128 Reseñas)</Text>
                                     </div>
 
-                                    <Text className="!text-3xl font-sans font-medium text-valex-bronce mb-8 inline-block">
+                                    <Text className="!text-2xl md:!text-3xl font-sans font-medium text-valex-bronce mb-6 inline-block">
                                         ${Number(product.price).toFixed(2)}
                                     </Text>
 
