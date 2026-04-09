@@ -8,6 +8,15 @@ import { useCart } from '../context/CartContext';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 
+const formatPrice = (price, isCRC) => {
+    return new Intl.NumberFormat(isCRC ? 'es-CR' : 'en-US', {
+        style: 'currency',
+        currency: isCRC ? 'CRC' : 'USD',
+        minimumFractionDigits: isCRC ? 0 : 2,
+        maximumFractionDigits: isCRC ? 0 : 2
+    }).format(Number(price) || 0);
+};
+
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
 
@@ -21,10 +30,51 @@ export default function ProductDetail() {
     const [mainImageLoaded, setMainImageLoaded] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-    const images = product ? (product.galleryImages?.length > 0 ? product.galleryImages : [product.coverImage || product.imageUrl].filter(Boolean)) : [];
+    // Galería: primero las imágenes con fondo (galleryImages), luego la imagen blanca (coverImage) como secundaria
+    const images = product ? (() => {
+        const allImages = [];
+        if (product.galleryImages?.length > 0) {
+            allImages.push(...product.galleryImages);
+        }
+        // Agregar coverImage como imagen secundaria (fondo blanco)
+        if (product.coverImage) {
+            allImages.push(product.coverImage);
+        } else if (product.imageUrl && allImages.length === 0) {
+            allImages.push(product.imageUrl);
+        }
+        return allImages.length > 0 ? allImages : [];
+    })() : [];
 
     const nextImage = () => setCurrentImageIndex((prev) => (prev + 1) % images.length);
     const prevImage = () => setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+
+    // Lógica para deslizar (swipe) en móvil
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchEnd, setTouchEnd] = useState(null);
+
+    const handleTouchStart = (e) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchMove = (e) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > 50;
+        const isRightSwipe = distance < -50;
+        
+        if (isLeftSwipe && images.length > 1) {
+            nextImage();
+            setMainImageLoaded(false);
+        } else if (isRightSwipe && images.length > 1) {
+            prevImage();
+            setMainImageLoaded(false);
+        }
+    };
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -109,7 +159,7 @@ export default function ProductDetail() {
                         <Row gutter={[48, 48]}>
                             <Col xs={24} md={11} lg={12}>
                                 {/* Skeleton idéntico para evitar "layout shift" o "flash", sin pulse agresivo */}
-                                <div className="aspect-square bg-transparent border border-valex-gris/10 flex items-center justify-center">
+                                <div className="aspect-[10/11] md:aspect-square bg-transparent border border-valex-gris/10 flex items-center justify-center">
                                     <div className="w-8 h-8 rounded-full border-2 border-valex-bronce/30 border-t-valex-bronce animate-spin" />
                                 </div>
                             </Col>
@@ -123,7 +173,7 @@ export default function ProductDetail() {
                             {/* COLUMNA IZQUIERDA: GALERÍA CARUSEL */}
                             <Col xs={24} md={11} lg={12}>
                                 <div className="sticky top-24">
-                                    <div className="aspect-square bg-transparent relative border border-valex-gris/10 overflow-hidden group rounded-sm">
+                                    <div className="aspect-[10/11] md:aspect-square bg-transparent relative border border-valex-gris/10 overflow-hidden group rounded-sm">
                                         <img 
                                             src={images[currentImageIndex]} 
                                             alt={product.name} 
@@ -144,6 +194,9 @@ export default function ProductDetail() {
                                                 backgroundImage: `url(${images[currentImageIndex]})`,
                                                 filter: isOutOfStock ? 'grayscale(100%) opacity(70%)' : 'none'
                                             }}
+                                            onTouchStart={handleTouchStart}
+                                            onTouchMove={handleTouchMove}
+                                            onTouchEnd={handleTouchEnd}
                                         />
 
                                         {/* Navegación del Carrusel Overlay */}
@@ -197,9 +250,14 @@ export default function ProductDetail() {
                                         <Text className="text-valex-gris text-xs md:text-sm underline cursor-pointer">4.9/5 (128 Reseñas)</Text>
                                     </div>
 
-                                    <Text className="!text-2xl md:!text-3xl font-sans font-medium text-valex-bronce mb-6 inline-block">
-                                        ${Number(product.price).toFixed(2)}
-                                    </Text>
+                                    <div className="flex items-end gap-3 mb-6">
+                                        <Text className="!text-3xl md:!text-4xl font-sans font-medium text-valex-bronce inline-block">
+                                            {formatPrice(product.price, product.currency === 'CRC')}
+                                        </Text>
+                                        <Text className="text-valex-gris/60 text-sm font-sans mb-1.5">
+                                            / {product.ml || '100'} ml
+                                        </Text>
+                                    </div>
 
                                     <div className="flex flex-row gap-3 sm:gap-4 mb-8 w-full">
                                         <Button 
@@ -243,7 +301,7 @@ export default function ProductDetail() {
                                     </div>
 
                                     {/* Acordeones Sensoriales */}
-                                    <Collapse defaultActiveKey={['1']} ghost expandIconPosition="end">
+                                    <Collapse defaultActiveKey={[]} ghost expandIconPosition="end">
                                         <Collapse.Panel header={<span className="font-serif tracking-widest text-valex-hueso text-base">LA EXPERIENCIA</span>} key="1">
                                             <Paragraph className="!text-valex-gris !text-sm !font-light leading-relaxed">
                                                 {product.description || "Una fragancia magistral que redefine la perfumería clásica. Construida con los ingredientes más puros y exóticos recolectados alrededor del mundo. Cada gota es una historia de lujo, pasión y exclusividad absoluta."}
@@ -269,7 +327,7 @@ export default function ProductDetail() {
 
                     {/* MÓDULO DE TESTIMONIOS (MOCK HIGH CONVERSION) */}
                     {!loading && (
-                        <div className="mt-32 border-t border-valex-gris/10 pt-20">
+                        <div className="mt-16 border-t border-valex-gris/10 pt-16">
                             <Title level={2} className="!font-serif !text-3xl !text-valex-hueso text-center !mb-12 !font-normal">
                                 Lo que dicen nuestros clientes
                             </Title>

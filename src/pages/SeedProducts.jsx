@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { collection, addDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { collection, addDoc, doc, setDoc, getDocs, deleteDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL, listAll, deleteObject } from 'firebase/storage';
 import { db, storage } from '../firebase/firebase';
 import { Button, Typography, notification } from 'antd';
 import { CheckCircleOutlined, SyncOutlined } from '@ant-design/icons';
@@ -8,61 +8,216 @@ import { CheckCircleOutlined, SyncOutlined } from '@ant-design/icons';
 const { Title, Text } = Typography;
 
 const NEW_PRODUCTS = [
-  {
-    name: "Vanilla Noir Extraordinare",
-    category: "Unisex",
-    family: "Oriental",
-    price: 185.00,
-    stock: 25,
-    notes: "Vainilla de Madagascar, Ámbar puro, Tabaco tostado, Incienso.",
-    description: "Una sinfonía oscura y envolvente. Vanilla Noir desafía los sentidos con una vainilla ahumada de Madagascar profundamente madurada, cortada por la calidez del ámbar puro y el tabaco tostado. Un perfume para la noche y el misterio.",
-    localImageUrl: "/images/vanilla_noir.png",
-    isFeatured: true
-  },
-  {
-    name: "Rose Gold Essence",
-    category: "Femenino",
-    family: "Floral",
-    price: 140.00,
-    stock: 12,
-    notes: "Rosas Búlgaras, Peonía, Almizcle Blanco, Sándalo.",
-    description: "Elegancia embotellada. Un homenaje a la sofisticación moderna, Rose Gold Essence resplandece con un Bouquet de Rosas Búlgaras frescas y Peonías cubiertas de rocío, sentando una base de Almizcle Blanco que acaricia la piel por más de 12 horas.",
-    localImageUrl: "/images/rose_gold_essence.png",
-    isFeatured: false
-  },
-  {
-    name: "Oceanic Vetiver",
-    category: "Masculino",
-    family: "Acuático",
-    price: 130.00,
-    stock: 40,
-    notes: "Vetiver de Haití, Sal Marina, Bergamota, Maderas Costeras.",
-    description: "El poder del acantilado en tu piel. Oceanic Vetiver combina la frescura implacable de la sal marina y la bergamota con las notas terrosas, robustas y varoniles del vetiver haitiano más puro. Para el hombre moderno y seguro.",
-    localImageUrl: "/images/oceanic_vetiver.png",
-    isFeatured: false
-  },
-  {
-    name: "Spiced Saffron Intense",
-    category: "Unisex",
-    family: "Oriental",
-    price: 210.00,
-    stock: 8,
-    notes: "Azafrán Rojo, Praliné, Maderas de Cedro, Especias Árabes.",
-    description: "Oriental, exótico y sumamente adictivo. Una extravagancia de Azafrán rojo infundido con un corazón de praliné gourmand. Destinado a aquellos que no temen dejar una estela magnética e inolvidable al caminar.",
-    localImageUrl: "/images/spiced_saffron.png",
-    isFeatured: true
-  },
-  {
-    name: "Midnight Leather",
-    category: "Masculino",
-    family: "Cuero",
-    price: 165.00,
-    stock: 15,
-    notes: "Cuero Toscano, Frambuesa Oscura, Cardamomo, Pachulí.",
-    description: "Peligrosamente adictivo. Midnight Leather abraza la brutalidad cruda del cuero toscano artesanal suavizado con la acidez de la frambuesa oscura, logrando una fragancia alfa, imponente e increíblemente nocturna.",
-    localImageUrl: "/images/midnight_leather.png",
-    isFeatured: false
-  }
+    {
+        name: "Versace Eros Najim",
+        category: "Masculino",
+        family: "Oriental",
+        price: 48500,
+        currency: "CRC",
+        ml: "100",
+        stock: "Disponible",
+        notes: "Caramelo, Mandarina, Madera de Oud, Incienso, Especias.",
+        description: "Versace Eros Najim (2024) es una fragancia masculina de la familia Oriental Amaderada, descrita como una estrella radiante y potente que evoca la calidez del desierto al atardecer. Combina caramelo y mandarina italiana con madera de oud, incienso y especias, ofreciendo un aroma intenso, dulce y sofisticado.",
+        localImageUrl: "/images/productos/versace_eros_najim/versace_eros_najim.png",
+        localGalleryUrls: [],
+        isFeatured: true
+    },
+    {
+        name: "Carolina Herrera La Bomba",
+        category: "Femenino",
+        family: "Floral",
+        price: 75000,
+        currency: "CRC",
+        ml: "80",
+        stock: "Disponible",
+        notes: "Pitahaya (Fruta del dragón), Peonía Roja, Vainilla Solar.",
+        description: "La Bomba de Carolina Herrera es una fragancia femenina floral-ambarada, intensa y vibrante, diseñada para mujeres seguras y libres. Destaca por su aroma exótico de pitahaya (fruta del dragón), peonía roja y vainilla solar en un frasco fucsia con forma de mariposa, simbolizando energía y transformación.",
+        localImageUrl: "/images/productos/carolina_herrera_la_bomba/carolina_herrera_la_bomba.png",
+        localGalleryUrls: [],
+        isFeatured: true
+    },
+    {
+        name: "Jean Paul Gaultier Scandal Pour Homme",
+        category: "Masculino",
+        family: "Amaderado",
+        price: 55500,
+        currency: "CRC",
+        ml: "100",
+        stock: "Disponible",
+        notes: "Caramelo, Haba Tonka, Mandarina, Esclarea.",
+        description: "Scandal Pour Homme de Jean Paul Gaultier (2021) es un Eau de Toilette intenso, amaderado y oriental, diseñado para ser seductor y provocativo. Destaca por una adictiva combinación de caramelo y haba tonka, equilibrada con mandarina y esclarea, que ofrece gran duración (8+ horas) y una fuerte estela, ideal para la noche, fiestas o clima frío.",
+        localImageUrl: "/images/productos/jpg_scandal_pour_homme/jpg_scandal_pour_homme.png",
+        localGalleryUrls: [],
+        isFeatured: true
+    },
+    {
+        name: "Tommy Girl",
+        category: "Femenino",
+        family: "Floral",
+        price: 22000,
+        currency: "CRC",
+        ml: "100",
+        stock: "Disponible",
+        notes: "Grosellas Negras, Camelia, Mandarina, Menta, Rosa, Limón.",
+        description: "Tommy Girl de Tommy Hilfiger (1996) es una fragancia icónica floral-frutal, fresca y enérgica, diseñada para la mujer moderna, inteligente y espontánea. Creada por Calice Becker, destaca por notas de grosellas negras, camelia, mandarina y manzano en flor, con un corazón de menta, rosa y limón, ideal para uso diario en primavera/verano.",
+        localImageUrl: "/images/productos/tommy_girl/tommy_girl.png",
+        localGalleryUrls: [],
+        isFeatured: true
+    },
+    {
+        name: "Bvlgari Man Terrae Essence",
+        category: "Masculino",
+        family: "Amaderado",
+        price: 52500,
+        currency: "CRC",
+        ml: "100",
+        stock: "Disponible",
+        notes: "Tierra mojada, Cítricos, Vetiver.",
+        description: "Bvlgari Man Terrae Essence es una fragancia amaderada terrosa, creada por el perfumista Alberto Morillas como un homenaje a la fertilidad de la tierra. Destaca por su aroma a tierra mojada, cítricos y vetiver, ofreciendo un perfil sofisticado y cálido ideal para otoño o primavera.",
+        localImageUrl: "/images/productos/bvlgari_man_terrae_essence/bvlgari_man_terrae_essence.png",
+        localGalleryUrls: [],
+        isFeatured: true
+    },
+    {
+        name: "Carolina Herrera Good Girl Elixir",
+        category: "Femenino",
+        family: "Floral",
+        price: 65000,
+        currency: "CRC",
+        ml: "50",
+        stock: "Disponible",
+        notes: "Rosa Cautivadora, Vainilla Voluminosa, Pachulí Ahumado.",
+        description: "Good Girl Blush Elixir de Carolina Herrera es un Eau de Parfum intenso y sofisticado, caracterizado como un aroma chipre floral y amaderado. Es una versión más sensual y atrevida de Good Girl Blush, destacando por una mezcla incandescente de rosa cautivadora, vainilla voluminosa y pachulí ahumado.",
+        localImageUrl: "/images/productos/ch_good_girl_elixir/ch_good_girl_elixir.png",
+        localGalleryUrls: [],
+        isFeatured: true
+    },
+    {
+        name: "Carolina Herrera Bad Boy Extreme",
+        category: "Masculino",
+        family: "Amaderado",
+        price: 60000,
+        currency: "CRC",
+        ml: "100",
+        stock: "Disponible",
+        notes: "Jengibre, Cacao Profundo, Vetiver, Pachulí.",
+        description: "Carolina Herrera Bad Boy Extreme es una fragancia amaderada aromática de 2023, intensa y seductora, que redefine la masculinidad moderna con una mezcla de jengibre, cacao profundo y vetiver. Es una versión \"extreme\" de alta durabilidad (hasta 10 horas) y proyección generosa, ideal para noches frescas o eventos sociales, destacando por su balance entre cacao cremoso, especias y notas amaderadas de pachulí.",
+        localImageUrl: "/images/productos/ch_bad_boy_extreme/ch_bad_boy_extreme.png",
+        localGalleryUrls: [],
+        isFeatured: true
+    },
+    {
+        name: "Paco Rabanne 1 Million Elixir",
+        category: "Masculino",
+        family: "Amaderado",
+        price: 58000,
+        currency: "CRC",
+        ml: "100",
+        stock: "Disponible",
+        notes: "Manzana, Davana, Rosa de Damasco, Vainilla, Haba Tonka.",
+        description: "1 Million Elixir de Paco Rabanne (2022) es una fragancia masculina de la familia amaderada aromática, caracterizada por ser extremadamente dulce, intensa y de larga duración. Destaca por notas de manzana, davana, rosa de Damasco, vainilla y haba tonka, ideal para clima frío, la noche y uso juvenil.",
+        localImageUrl: "/images/productos/pr_one_million_elixir/pr_one_million_elixir.png",
+        localGalleryUrls: [],
+        isFeatured: true
+    },
+    {
+        name: "Bharara King",
+        category: "Masculino",
+        family: "Cítrico",
+        price: 37000,
+        currency: "CRC",
+        ml: "100",
+        stock: "Disponible",
+        notes: "Naranja, Bergamota, Limón, Vainilla, Almizcle Blanco, Ámbar.",
+        description: "Bharara King es una fragancia árabe Eau de Parfum aromática y frutal para hombres, conocida por ser dulce, cítrica y de alta duración. Destaca por notas de naranja, bergamota, limón, notas afrutadas, vainilla, almizcle blanco y ámbar, ideal para uso diario o eventos nocturnos por su gran fijación.",
+        localImageUrl: "/images/productos/bharara_king/bharara_king.png",
+        localGalleryUrls: [],
+        isFeatured: true
+    },
+    {
+        name: "Invictus Victory",
+        category: "Masculino",
+        family: "Oriental",
+        price: 58000,
+        currency: "CRC",
+        ml: "100",
+        stock: "Disponible",
+        notes: "Limón, Pimienta Rosa, Lavanda, Incienso, Vainilla, Haba Tonka.",
+        description: "Invictus Victory de Paco Rabanne es un Eau de Parfum de la familia olfativa Ámbar para hombres, lanzado en 2021. Destaca por un intenso contraste entre frescor y sensualidad, combinando notas de limón y pimienta rosa con un corazón de lavanda e incienso, y un fondo dulce y adictivo de vainilla y haba tonka.",
+        localImageUrl: "/images/productos/invictus_victory/invictus_victory.png",
+        localGalleryUrls: [],
+        isFeatured: true
+    },
+    {
+        name: "Jean Paul Gaultier Le Beau",
+        category: "Masculino",
+        family: "Amaderado",
+        price: 60000,
+        currency: "CRC",
+        ml: "75",
+        stock: "Disponible",
+        notes: "Coco, Piña, Haba Tonka, Jengibre, Sándalo.",
+        description: "Jean Paul Gaultier Le Beau Le Parfum (2022) es una fragancia ambarina amaderada intensa, creada por Quentin Bisch. Destaca por sus notas tropicales y adictivas de coco, piña y haba tonka, con un toque fresco de jengibre y una base sensual de sándalo. Es un aroma juvenil, dulce y seductor, ideal para la noche.",
+        localImageUrl: "/images/productos/jpg_le_beau/jpg_le_beau.png",
+        localGalleryUrls: [],
+        isFeatured: true
+    },
+    {
+        name: "Givenchy Gentleman Society",
+        category: "Masculino",
+        family: "Amaderado",
+        price: 54000,
+        currency: "CRC",
+        ml: "100",
+        stock: "Disponible",
+        notes: "Tabaco, Ámbar, Vainilla de Madagascar, Cuero.",
+        description: "Givenchy Gentleman Society Ambrée es un Eau de Parfum oriental amaderado para hombres, descrito como una versión intensa, cálida y sofisticada de la línea Society. Combina notas de tabaco, ámbar, vainilla de Madagascar y un toque de cuero, ofreciendo un aroma adictivo y elegante, ideal para citas y uso en clima frío.",
+        localImageUrl: "/images/productos/gentleman_society/gentleman_society.png",
+        localGalleryUrls: [],
+        isFeatured: true
+    },
+    {
+        name: "Bvlgari Pour Homme",
+        category: "Masculino",
+        family: "Amaderado",
+        price: 52500,
+        currency: "CRC",
+        ml: "100",
+        stock: "Disponible",
+        notes: "Té Darjeeling, Bergamota, Almizcle.",
+        description: "Bvlgari Pour Homme (1996) es una fragancia clásica, amaderada floral almizclada, conocida por su aroma limpio, sutil y sofisticado. Creada por Jacques Cavallier, destaca por su nota distintiva de té Darjeeling, bergamota y almizcle, ofreciendo una estela moderada-suave ideal para la oficina, el uso diario y climas cálidos.",
+        localImageUrl: "/images/productos/bvlgari_pour_homme/bvlgari_pour_homme.png",
+        localGalleryUrls: [],
+        isFeatured: true
+    },
+    {
+        name: "Azzaro Wanted",
+        category: "Masculino",
+        family: "Amaderado",
+        price: 45000,
+        currency: "CRC",
+        ml: "100",
+        stock: "Disponible",
+        notes: "Limón, Jengibre, Lavanda, Cardamomo.",
+        description: "Azzaro Wanted (2016) es una fragancia amaderada especiada para hombres, creada por Fabrice Pellegrin y Olivier Cresp, que destaca por su frescura cítrica inicial y un fondo cálido y seductor. Diseñada para el hombre intrépido y seguro de sí mismo, combina notas de limón, jengibre, lavanda y cardamomo en un icónico frasco tipo barril.",
+        localImageUrl: "/images/productos/azzaro_wanted/azzaro_wanted.png",
+        localGalleryUrls: [],
+        isFeatured: true
+    },
+    {
+        name: "Carolina Herrera CH Men",
+        category: "Masculino",
+        family: "Oriental",
+        price: 52500,
+        currency: "CRC",
+        ml: "100",
+        stock: "Disponible",
+        notes: "Hierba, Bergamota, Azafrán, Nuez Moscada, Cuero, Vainilla, Azúcar.",
+        description: "CH Men de Carolina Herrera es una fragancia oriental especiada, definida por su elegancia, sensualidad y estilo aventurero. Combina notas de salida de hierba y bergamota con un corazón amaderado de azafrán y nuez moscada, cerrando con cuero, vainilla y azúcar, ideal para hombres que buscan un aroma sofisticado y magnético.",
+        localImageUrl: "/images/productos/ch_men/ch_men.png",
+        localGalleryUrls: [],
+        isFeatured: true
+    }
 ];
 
 export default function SeedProducts() {
@@ -73,35 +228,79 @@ export default function SeedProducts() {
         try {
             const productsRef = collection(db, 'products');
             let addedCount = 0;
-            
+            // 1. ELIMINAR TODOS LOS PRODUCTOS EXISTENTES PRIMERO
+            const existingQuery = await getDocs(productsRef);
+            for (const d of existingQuery.docs) {
+                // Limpiar storage (carpeta del id)
+                try {
+                    const fRef = ref(storage, `products/${d.id}`);
+                    const folderContents = await listAll(fRef);
+                    await Promise.all(folderContents.items.map(i => deleteObject(i)));
+                } catch(e) { } // ignorar si no existe
+                // Borrar db
+                await deleteDoc(doc(db, 'products', d.id));
+            }
+
+            // 2. CREAR NUEVOS CON ESTRUCTURA DE CARPETAS
             for (const prod of NEW_PRODUCTS) {
+                // Generar el ID primero
+                const newDocRef = doc(collection(db, 'products'));
+                const productId = newDocRef.id;
+
                 let coverImageUrl = prod.localImageUrl;
-                let galleryUrls = [prod.localImageUrl, prod.localImageUrl, prod.localImageUrl];
+                let galleryUrls = [];
 
                 try {
-                    // Leer imagen local a Blob
+                    // Subir Cover Image
                     const response = await fetch(prod.localImageUrl);
                     const blob = await response.blob();
                     
-                    // Intentar subir a Firebase Storage
-                    const fileName = `products/${Date.now()}_${prod.localImageUrl.split('/').pop()}`;
-                    const storageRef = ref(storage, fileName);
+                    const coverName = `products/${productId}/cover_${Date.now()}_${prod.localImageUrl.split('/').pop()}`;
+                    const storageRef = ref(storage, coverName);
                     await uploadBytes(storageRef, blob, { contentType: 'image/png' });
                     coverImageUrl = await getDownloadURL(storageRef);
-                    galleryUrls = [coverImageUrl, coverImageUrl, coverImageUrl];
+                    
+                    // Subir Gallery Images concurrentemente (y autodetectar _bg.png si existe localmente)
+                    const bgUrl = prod.localImageUrl.replace('.png', '_bg.png');
+                    const bgResponse = await fetch(bgUrl);
+                    
+                    if (bgResponse.ok) {
+                        const bgBlob = await bgResponse.blob();
+                        if (bgBlob.type.includes('image')) {
+                            const galName = `products/${productId}/gal_bg_${Date.now()}_${bgUrl.split('/').pop()}`;
+                            const galRef = ref(storage, galName);
+                            await uploadBytes(galRef, bgBlob, { contentType: 'image/png' });
+                            const bgDownloadUrl = await getDownloadURL(galRef);
+                            galleryUrls.push(bgDownloadUrl);
+                        }
+                    }
+
+                    // A continuación, si en algún momento se incluyen más imágenes en localGalleryUrls
+                    const galleryPromises = prod.localGalleryUrls.map(async (localUrl, index) => {
+                        const res = await fetch(localUrl);
+                        if (!res.ok) return null;
+                        const galBlob = await res.blob();
+                        const galName = `products/${productId}/gal_${index}_${Date.now()}_${localUrl.split('/').pop()}`;
+                        const galRef = ref(storage, galName);
+                        await uploadBytes(galRef, galBlob, { contentType: 'image/png' });
+                        return getDownloadURL(galRef);
+                    });
+                    
+                    const additionalGals = await Promise.all(galleryPromises);
+                    galleryUrls = [...galleryUrls, ...additionalGals.filter(url => url !== null)];
                 } catch (err) {
-                    console.warn(`⚠️ No se pudo subir ${prod.localImageUrl} a Firebase Storage (posible falta de permisos o CORS). Usando ruta local temporalmente.`, err);
+                    console.warn(`⚠️ No se pudo subir ${prod.localImageUrl} a Firebase Storage.`, err);
                 }
 
-                // Reemplazar URL con la nueva estructura de Cover y Gallery
                 const finalProduct = {
                      ...prod,
                      coverImage: coverImageUrl,
                      galleryImages: galleryUrls
                 };
                 delete finalProduct.localImageUrl;
+                delete finalProduct.localGalleryUrls;
 
-                await addDoc(productsRef, finalProduct);
+                await setDoc(newDocRef, finalProduct);
                 addedCount++;
             }
 
@@ -126,7 +325,7 @@ export default function SeedProducts() {
             <div className="max-w-xl w-full bg-[#1e1e1f] border border-valex-bronce/30 p-10 rounded-2xl text-center shadow-[0_0_50px_rgba(166,137,102,0.1)]">
                 <Title level={2} className="!font-serif !text-valex-hueso !mb-2">Centro de Inyección</Title>
                 <Text className="text-valex-gris block mb-8 font-light">
-                    Presiona el botón para cargar instantáneamente los 5 nuevos productos premium (Vanilla Noir, Rose Gold, Oceanic Vetiver, Spiced Saffron, Midnight Leather) en tu tienda.
+                    Presiona el botón para <b>eliminar el catálogo actual</b> y cargar instantáneamente los 5 productos premium de prueba. Se subirán organizados en carpetas dentro de tu Storage.
                 </Text>
                 
                 <Button 

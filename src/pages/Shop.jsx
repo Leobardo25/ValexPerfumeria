@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/firebase';
 import { Layout, Row, Col, Card, Button, Badge, Skeleton, Radio, Checkbox, Slider, Collapse, Typography, FloatButton, Drawer, notification, ConfigProvider, theme as antTheme, Grid, Input } from 'antd';
-import { ShoppingCartOutlined, FilterOutlined, SearchOutlined } from '@ant-design/icons';
+import { ShoppingCartOutlined, FilterOutlined, SearchOutlined, PictureOutlined, BgColorsOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import Navbar from '../components/layout/Navbar';
@@ -25,6 +25,15 @@ const FAMILIES = [
     { label: 'Cuero', value: 'Cuero' },
 ];
 
+const formatPrice = (price, isCRC) => {
+    return new Intl.NumberFormat(isCRC ? 'es-CR' : 'en-US', {
+        style: 'currency',
+        currency: isCRC ? 'CRC' : 'USD',
+        minimumFractionDigits: isCRC ? 0 : 2,
+        maximumFractionDigits: isCRC ? 0 : 2
+    }).format(Number(price) || 0);
+};
+
 export default function Shop() {
     const screens = useBreakpoint();
     const [products, setProducts] = useState([]);
@@ -32,6 +41,7 @@ export default function Shop() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [drawerVisible, setDrawerVisible] = useState(false);
     const [isCompactView, setIsCompactView] = useState(() => JSON.parse(sessionStorage.getItem('valex_isCompactView') || 'false'));
+    const [useBgImages, setUseBgImages] = useState(() => JSON.parse(sessionStorage.getItem('valex_useBgImages') ?? 'true'));
 
     // --- ESTADO DE FILTROS ---
     const [filterCategory, setFilterCategory] = useState(() => sessionStorage.getItem('valex_category') || 'Todos');
@@ -49,7 +59,8 @@ export default function Shop() {
         sessionStorage.setItem('valex_families', JSON.stringify(filterFamilies));
         sessionStorage.setItem('valex_price', JSON.stringify(filterPrice));
         sessionStorage.setItem('valex_search', searchQuery);
-    }, [isCompactView, filterCategory, filterFamilies, filterPrice, searchQuery]);
+        sessionStorage.setItem('valex_useBgImages', JSON.stringify(useBgImages));
+    }, [isCompactView, filterCategory, filterFamilies, filterPrice, searchQuery, useBgImages]);
 
     useEffect(() => {
         // Real-time setup
@@ -88,6 +99,20 @@ export default function Shop() {
     }, [products, filterCategory, filterPrice, filterFamilies, searchQuery]);
 
     const { addToCart } = useCart();
+
+    const isColones = useMemo(() => products.some(p => p.currency === 'CRC'), [products]);
+    const maxBoundary = useMemo(() => {
+        if (!products.length) return 300;
+        const max = Math.max(...products.map(p => Number(p.price) || 0));
+        return isColones ? Math.ceil(max / 10000) * 10000 : Math.max(Math.ceil(max / 50) * 50, 300);
+    }, [products, isColones]);
+
+    // Checkear si el filtro guardado es diminuto vs la nueva moneda para auto-expandirlo
+    useEffect(() => {
+        if (isColones && filterPrice[1] <= 300) {
+            setFilterPrice([0, maxBoundary]);
+        }
+    }, [isColones, maxBoundary]);
 
     // --- ACCIONES ---
     const handleAddToCart = (product) => {
@@ -131,7 +156,7 @@ export default function Shop() {
                         <div className="valex-range-wrap">
                             <input 
                                 type="range" 
-                                min={0} max={300} step={10}
+                                min={0} max={maxBoundary} step={isColones ? 1000 : 10}
                                 value={filterPrice[0]} 
                                 onChange={e => {
                                     const val = Number(e.target.value);
@@ -141,7 +166,7 @@ export default function Shop() {
                             />
                             <input 
                                 type="range" 
-                                min={0} max={300} step={10}
+                                min={0} max={maxBoundary} step={isColones ? 1000 : 10}
                                 value={filterPrice[1]} 
                                 onChange={e => {
                                     const val = Number(e.target.value);
@@ -153,24 +178,24 @@ export default function Shop() {
                                 <div 
                                     className="valex-range-fill"
                                     style={{
-                                        left: `${(filterPrice[0] / 300) * 100}%`,
-                                        right: `${100 - (filterPrice[1] / 300) * 100}%`
+                                        left: `${(filterPrice[0] / maxBoundary) * 100}%`,
+                                        right: `${100 - (filterPrice[1] / maxBoundary) * 100}%`
                                     }}
                                 />
                             </div>
                         </div>
                         <div className="flex justify-between text-valex-bronce text-sm mt-4 font-sans font-medium">
-                            <span>${filterPrice[0]}</span>
-                            <span>${filterPrice[1]}</span>
+                            <span>{formatPrice(filterPrice[0], isColones)}</span>
+                            <span>{formatPrice(filterPrice[1], isColones)}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Action buttons pinned at bottom */}
-            <div className="flex-shrink-0 pt-6 pb-2 border-t border-valex-gris/10 flex gap-3">
+            <div className="flex-shrink-0 pt-4 pb-4 mt-2 border-t border-valex-gris/10 flex gap-3">
                  <Button 
-                    onClick={() => { setFilterCategory('Todos'); setFilterFamilies([]); setFilterPrice([0, 300]); setDrawerVisible(false); }} 
+                    onClick={() => { setFilterCategory('Todos'); setFilterFamilies([]); setFilterPrice([0, maxBoundary]); setDrawerVisible(false); }} 
                     className="flex-1 h-12 bg-transparent text-valex-gris border-valex-bronce/30 hover:!border-valex-hueso hover:!text-valex-hueso font-serif tracking-widest text-xs"
                  >
                      LIMPIAR
@@ -239,7 +264,7 @@ export default function Shop() {
                                 ) : filteredProducts.length === 0 ? (
                                     <div className="text-center py-24 border border-valex-gris/10 rounded-2xl bg-[#1e1e1f]">
                                         <p className="text-valex-gris text-xl font-serif">No se encontraron fragancias con esta selección.</p>
-                                        <Button type="link" onClick={() => { setFilterCategory('Todos'); setFilterFamilies([]); setFilterPrice([0, 300]); }}>
+                                        <Button type="link" onClick={() => { setFilterCategory('Todos'); setFilterFamilies([]); setFilterPrice([0, maxBoundary]); }}>
                                             Limpiar filtros
                                         </Button>
                                     </div>
@@ -252,7 +277,7 @@ export default function Shop() {
                                                     <Col md={8} lg={6} key={product.id}>
                                                         <motion.div layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.35 }} className="h-full">
                                                             <CardBadgeWrap product={product}>
-                                                                <DesktopCard product={product} />
+                                                                <DesktopCard product={product} useBg={useBgImages} />
                                                             </CardBadgeWrap>
                                                         </motion.div>
                                                     </Col>
@@ -265,7 +290,7 @@ export default function Shop() {
                                             {filteredProducts.map(product => (
                                                 <motion.div key={product.id} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
                                                     <CardBadgeWrap product={product}>
-                                                        <MobileCard product={product} />
+                                                        <MobileCard product={product} useBg={useBgImages} />
                                                     </CardBadgeWrap>
                                                 </motion.div>
                                             ))}
@@ -278,7 +303,7 @@ export default function Shop() {
                                                     <Col xs={12} key={product.id}>
                                                         <motion.div layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.35 }} className="h-full">
                                                             <CardBadgeWrap product={product}>
-                                                                <MobileCompactCard product={product} />
+                                                                <MobileCompactCard product={product} useBg={useBgImages} />
                                                             </CardBadgeWrap>
                                                         </motion.div>
                                                     </Col>
@@ -289,6 +314,29 @@ export default function Shop() {
                                 )}
                             </section>
                         </div>
+
+                    {/* Botón flotante para cambiar tipo de imagen */}
+                    <button
+                        onClick={() => setUseBgImages(prev => !prev)}
+                        className="fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-500 hover:scale-110 active:scale-95 group border"
+                        style={{
+                            background: useBgImages 
+                                ? 'linear-gradient(135deg, #1A1A1B 0%, #2a2a2b 100%)' 
+                                : 'linear-gradient(135deg, #F5F5F5 0%, #ffffff 100%)',
+                            borderColor: useBgImages ? 'rgba(166,137,102,0.4)' : 'rgba(209,209,209,0.4)',
+                        }}
+                        title={useBgImages ? 'Cambiar a fondo blanco' : 'Cambiar a fondo cinematográfico'}
+                    >
+                        {useBgImages ? (
+                            <PictureOutlined className="text-xl" style={{ color: '#A68966' }} />
+                        ) : (
+                            <BgColorsOutlined className="text-xl" style={{ color: '#1A1A1B' }} />
+                        )}
+                        {/* Tooltip label */}
+                        <span className="absolute left-[calc(100%+8px)] whitespace-nowrap bg-valex-negro/90 text-valex-hueso text-[10px] font-sans tracking-wider px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none border border-valex-bronce/20">
+                            {useBgImages ? 'Fondo Blanco' : 'Fondo Cinemático'}
+                        </span>
+                    </button>
                 </main>
             </div>
         </ConfigProvider>
@@ -309,10 +357,11 @@ const CardBadgeWrap = ({ product, children }) => {
 // ══════════════════════════════════════════════════
 //  1. TARJETA PC (Desktop) — 4 columnas, compacta
 // ══════════════════════════════════════════════════
-const DesktopCard = ({ product }) => {
+const DesktopCard = ({ product, useBg }) => {
     const navigate = useNavigate();
     const isOutOfStock = product.stock === 'Agotado' || product.stock === 0;
-    const imgUrl = product.coverImage || product.imageUrl;
+    const hasBg = product.galleryImages && product.galleryImages.length > 0;
+    const imgUrl = useBg && hasBg ? product.galleryImages[0] : (product.coverImage || product.imageUrl);
 
     return (
         <Card
@@ -341,7 +390,7 @@ const DesktopCard = ({ product }) => {
             </Typography.Title>
             <div className="text-[11px] text-valex-gris/60 font-sans tracking-wide mb-2">{product.family || '—'}</div>
             <div className="mt-auto flex items-center justify-between pt-2 border-t border-valex-gris/10">
-                <span className="font-sans font-medium text-valex-bronce text-base tracking-wide">${Number(product.price).toFixed(2)}</span>
+                <span className="font-sans font-medium text-valex-bronce text-base tracking-wide">{formatPrice(product.price, product.currency === 'CRC')}</span>
                 <button 
                     onClick={(e) => { e.stopPropagation(); navigate(`/producto/${product.id}`); }}
                     className="text-[10px] font-sans uppercase tracking-[0.2em] text-valex-bronce hover:text-valex-hueso transition-all duration-300 border-b border-valex-bronce/30 hover:border-valex-hueso pb-0.5"
@@ -355,10 +404,11 @@ const DesktopCard = ({ product }) => {
 //  2. TARJETA MÓVIL LISTA — scroll natural
 //     Imagen 4:5, info compacta y legible
 // ══════════════════════════════════════════════════
-const MobileCard = ({ product }) => {
+const MobileCard = ({ product, useBg }) => {
     const navigate = useNavigate();
     const isOutOfStock = product.stock === 'Agotado' || product.stock === 0;
-    const imgUrl = product.coverImage || product.imageUrl;
+    const hasBg = product.galleryImages && product.galleryImages.length > 0;
+    const imgUrl = useBg && hasBg ? product.galleryImages[0] : (product.coverImage || product.imageUrl);
 
     return (
         <div 
@@ -392,7 +442,7 @@ const MobileCard = ({ product }) => {
                     {product.description || product.notes || '—'}
                 </p>
                 <div className="flex items-center justify-between pt-3 border-t border-valex-gris/10 mt-2">
-                    <span className="font-sans font-semibold text-valex-bronce text-xl tracking-wide">${Number(product.price).toFixed(2)}</span>
+                    <span className="font-sans font-semibold text-valex-bronce text-xl tracking-wide">{formatPrice(product.price, product.currency === 'CRC')}</span>
                     <button 
                         onClick={(e) => { e.stopPropagation(); navigate(`/producto/${product.id}`); }}
                         className="text-xs font-serif uppercase tracking-[0.15em] text-valex-negro bg-valex-bronce px-4 py-1.5 rounded hover:bg-valex-hueso transition-all duration-300"
@@ -406,10 +456,11 @@ const MobileCard = ({ product }) => {
 // ══════════════════════════════════════════════════
 //  3. TARJETA MÓVIL CUADRÍCULA — 2 columnas, mini
 // ══════════════════════════════════════════════════
-const MobileCompactCard = ({ product }) => {
+const MobileCompactCard = ({ product, useBg }) => {
     const navigate = useNavigate();
     const isOutOfStock = product.stock === 'Agotado' || product.stock === 0;
-    const imgUrl = product.coverImage || product.imageUrl;
+    const hasBg = product.galleryImages && product.galleryImages.length > 0;
+    const imgUrl = useBg && hasBg ? product.galleryImages[0] : (product.coverImage || product.imageUrl);
 
     return (
         <Card
@@ -435,8 +486,8 @@ const MobileCompactCard = ({ product }) => {
             <Typography.Title level={5} className="!font-serif !text-valex-hueso !mt-0 !mb-0.5 !text-xs">
                 {product.name}
             </Typography.Title>
-            <div className="flex items-center justify-between">
-                <span className="font-sans font-medium text-valex-bronce text-sm">${Number(product.price).toFixed(2)}</span>
+            <div className="flex items-center justify-between mt-1 border-t border-valex-gris/10 pt-2">
+                <span className="font-sans font-medium text-valex-bronce text-sm">{formatPrice(product.price, product.currency === 'CRC')}</span>
                 <span className="text-[9px] font-sans uppercase tracking-[0.15em] text-valex-bronce/70">VER</span>
             </div>
         </Card>

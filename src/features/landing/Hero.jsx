@@ -1,83 +1,84 @@
-import { useRef } from 'react'
 import { motion } from 'framer-motion'
-import { HERO_CONTENT, HERO_STATS } from '../../constants'
-import { heroReveal, fadeInUp, VALEX_SLOW, VALEX_TRANSITION } from '../../constants/motion'
-import { FaWhatsapp, FaInstagram, FaTiktok, FaFacebookF } from 'react-icons/fa'
-import useParallax from '../../hooks/useParallax'
-import heroImg from '../../img/perfumeria/hero.png'
+import { Link } from 'react-router-dom'
+import { FaInstagram, FaTiktok, FaFacebookF, FaWhatsapp } from 'react-icons/fa'
+import { HERO_CONTENT } from '../../constants'
+import { heroReveal, fadeInUp, VALEX_TRANSITION, VALEX_SLOW } from '../../constants/motion'
 
 export default function Hero() {
-    const sectionRef = useRef(null)
-    const parallaxY = useParallax(sectionRef, 0.1)
-
     return (
-        <section ref={sectionRef} id="inicio" className="relative min-h-[100svh] lg:min-h-[calc(100svh-70px)] flex items-center overflow-hidden bg-valex-negro">
-            {/* Background image — mobile */}
-            <div className="absolute inset-0 lg:hidden">
-                <img src={heroImg} alt="" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-valex-negro/85" />
+        <section className="relative h-screen w-full bg-valex-negro flex flex-col items-center justify-center overflow-hidden snap-start">
+            
+            {/* Background Video (Local) - Aplicado Desenfoque Bokeh para Enmascarar la Marca */}
+            <div className="absolute inset-0 w-full h-full z-0 pointer-events-none select-none overflow-hidden">
+                <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover select-none blur-[4px] scale-105"
+                    src="/videos/18s-hero.mp4"
+                />
+                
+                {/* Gradient oscuro sobre el lente desenfocado para dar el efecto de "esmerilado negro" */}
+                <div className="absolute inset-0 bg-gradient-to-b from-valex-negro/50 via-valex-negro/75 to-valex-negro/95 pointer-events-none" />
+                
+                {/* Textura sutil y viñeta en negro profundo */}
+                <div className="absolute inset-0 bg-black/30 shadow-[inset_0_0_150px_rgba(0,0,0,0.9)] pointer-events-none" />
             </div>
 
-            {/* Subtle orbs */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-valex-bronce/8 blur-3xl animate-pulse" />
-                <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-valex-bronce/5 blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
-            </div>
-
-            {/* Dot pattern */}
-            <div className="absolute inset-0 opacity-[0.03]" style={{
-                backgroundImage: 'radial-gradient(circle, #A68966 1px, transparent 1px)',
-                backgroundSize: '50px 50px'
-            }} />
-
-            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 lg:pt-24 lg:pb-20 w-full">
-                <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-                    {/* Left content — staggered reveal */}
-                    <motion.div
-                        className="space-y-8"
-                        initial="hidden"
-                        animate="visible"
-                        variants={{ visible: { transition: { staggerChildren: 0.15, delayChildren: 0.2 } } }}
-                    >
-                        <HeroBadge />
-                        <HeroTitle />
-                        <HeroSubtitle />
-                        <HeroCTA />
-                        <HeroSocials />
-                        <HeroStats />
-                    </motion.div>
-
-                    {/* Right side — Parallax image */}
-                    <motion.div
-                        className="relative hidden lg:block max-w-md mx-auto w-full"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ ...VALEX_SLOW, delay: 0.4 }}
-                    >
-                        <div className="relative">
-                            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-valex-bronce/15 to-valex-bronce/5 blur-2xl translate-x-4 translate-y-4" />
-                            <div className="relative aspect-[4/5] rounded-2xl border border-valex-gris/10 overflow-hidden shadow-2xl">
-                                <motion.img
-                                    src={heroImg}
-                                    alt="Frasco de perfume de lujo VALEX"
-                                    className="w-full h-full object-cover"
-                                    style={{ y: parallaxY }}
-                                />
-                                <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-valex-negro to-transparent" />
-                            </div>
-                        </div>
-                    </motion.div>
+            {/* Main Content */}
+            <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 w-full max-w-5xl mx-auto -mt-16">
+                <HeroBadge />
+                <HeroTitle />
+                <div className="w-16 h-[1px] bg-valex-bronce/30 my-8 shadow-sm" />
+                <HeroSubtitle />
+                <HeroCTA />
+                
+                {/* Redes Móviles Integradas (Inmediatamente debajo del CTA para evitar problemas de Overflow/Scroll) */}
+                <div className="flex justify-center mt-6 lg:hidden w-full">
+                    <HeroSocials />
+                </div>
+                
+                {/* Redes flotantes en Desktop */}
+                <div className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 flex-col gap-6 mr-8">
+                    <HeroSocials vertical />
                 </div>
             </div>
+
+            {/* Scroll Indicator - Habilitado para todas las resoluciones (Mobile + Desktop) */}
+            <motion.div 
+                className="absolute bottom-24 lg:bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 cursor-pointer group"
+                onClick={() => document.getElementById('colecciones')?.scrollIntoView({ behavior: 'smooth' })}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: false, amount: 0.1 }}
+                transition={{ duration: 1 }}
+            >
+                <span className="text-valex-hueso/50 text-[10px] uppercase tracking-[0.3em] font-sans group-hover:text-valex-bronce transition-colors">Descubre</span>
+                <div className="w-[1px] h-12 bg-valex-bronce/30 relative overflow-hidden">
+                    <motion.div 
+                        className="w-full h-full bg-valex-bronce"
+                        animate={{ y: ['-100%', '100%'] }}
+                        transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                    />
+                </div>
+            </motion.div>
         </section>
     )
 }
 
-/* Sub-components to keep Hero under 150 lines */
+/* Sub-components to keep Hero clean */
 
 function HeroBadge() {
     return (
-        <motion.span variants={heroReveal} transition={VALEX_SLOW} className="inline-block text-valex-bronce font-sans font-medium text-xs tracking-[0.25em] uppercase border border-valex-bronce/30 px-4 py-1.5 rounded-full">
+        <motion.span 
+            variants={heroReveal} 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, amount: 0.1 }}
+            transition={VALEX_SLOW} 
+            className="inline-block text-valex-bronce font-sans font-medium text-xs tracking-[0.25em] uppercase border border-valex-bronce/30 px-4 py-1.5 rounded-full"
+        >
             Perfumería de Autor
         </motion.span>
     )
@@ -85,18 +86,34 @@ function HeroBadge() {
 
 function HeroTitle() {
     return (
-        <motion.h1 variants={heroReveal} transition={VALEX_SLOW} className="font-serif font-bold text-5xl lg:text-6xl text-valex-hueso leading-[1.1] tracking-tight">
-            {HERO_CONTENT.title.split(' ').slice(0, 4).join(' ')}{' '}
-            <span className="text-valex-bronce italic">
-                {HERO_CONTENT.title.split(' ').slice(4).join(' ')}
-            </span>
-        </motion.h1>
+        <motion.div 
+            variants={heroReveal} 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, amount: 0.1 }}
+            transition={VALEX_SLOW} 
+            className="flex items-center pt-6 justify-center"
+        >
+            <h1 className="font-serif font-bold text-5xl md:text-6xl lg:text-7xl text-valex-hueso leading-[1.1] tracking-tight">
+                {HERO_CONTENT.title.split(' ').slice(0, 4).join(' ')}{' '}
+                <span className="text-valex-bronce italic">
+                    {HERO_CONTENT.title.split(' ').slice(4).join(' ')}
+                </span>
+            </h1>
+        </motion.div>
     )
 }
 
 function HeroSubtitle() {
     return (
-        <motion.p variants={heroReveal} transition={VALEX_SLOW} className="text-valex-gris text-lg sm:text-xl leading-relaxed max-w-lg font-light">
+        <motion.p 
+            variants={heroReveal} 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, amount: 0.1 }}
+            transition={VALEX_SLOW} 
+            className="text-valex-hueso/80 text-lg sm:text-xl leading-relaxed max-w-2xl font-light text-center"
+        >
             {HERO_CONTENT.subtitle}
         </motion.p>
     )
@@ -104,10 +121,17 @@ function HeroSubtitle() {
 
 function HeroCTA() {
     return (
-        <motion.div variants={fadeInUp} transition={VALEX_TRANSITION} className="flex flex-col sm:flex-row gap-4">
-            <a href={HERO_CONTENT.ctaHref} className="inline-flex items-center justify-center gap-2 font-sans font-semibold text-sm px-10 py-4 rounded-lg bg-valex-bronce text-valex-negro hover:bg-valex-bronce-dark shadow-lg hover:shadow-valex-bronce/30 transition-all duration-300 tracking-wide">
-                {HERO_CONTENT.cta}
-            </a>
+        <motion.div 
+            variants={heroReveal} 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, amount: 0.1 }}
+            transition={VALEX_SLOW} 
+            className="flex flex-col sm:flex-row gap-4 pt-4 justify-center"
+        >
+            <Link to="/tienda" className="inline-flex items-center justify-center gap-2 font-sans font-semibold text-sm px-10 py-4 rounded-lg bg-valex-bronce text-valex-negro hover:bg-valex-bronce-dark shadow-lg hover:shadow-valex-bronce/30 transition-all duration-300 tracking-wide">
+                Ver Catálogo
+            </Link>
             <a href="https://wa.me/xxxxxxxxxx" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 font-sans font-medium text-sm px-10 py-4 rounded-lg border border-valex-gris/20 text-valex-gris hover:text-valex-hueso hover:border-valex-gris/40 transition-all duration-300 tracking-wide">
                 <FaWhatsapp className="w-5 h-5" />
                 Contactar por WhatsApp
@@ -116,14 +140,21 @@ function HeroCTA() {
     )
 }
 
-function HeroSocials() {
+function HeroSocials({ vertical }) {
     const socials = [
         { icon: FaInstagram, href: '#' },
         { icon: FaTiktok, href: '#' },
         { icon: FaFacebookF, href: '#' },
     ]
     return (
-        <motion.div variants={fadeInUp} transition={VALEX_TRANSITION} className="flex items-center gap-4 pt-2">
+        <motion.div 
+            variants={fadeInUp} 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, amount: 0.1 }}
+            transition={VALEX_TRANSITION} 
+            className={`flex items-center gap-4 pt-2 ${vertical ? 'flex-col' : ''}`}
+        >
             {socials.map((social, i) => {
                 const Icon = social.icon
                 return (
@@ -132,19 +163,6 @@ function HeroSocials() {
                     </a>
                 )
             })}
-        </motion.div>
-    )
-}
-
-function HeroStats() {
-    return (
-        <motion.div variants={fadeInUp} transition={VALEX_TRANSITION} className="flex gap-10 pt-6">
-            {HERO_STATS.map((stat) => (
-                <div key={stat.label} className="text-center">
-                    <div className="text-valex-bronce font-serif font-bold text-2xl">{stat.value}</div>
-                    <div className="text-valex-gris/60 text-xs font-sans mt-1 tracking-wide uppercase">{stat.label}</div>
-                </div>
-            ))}
         </motion.div>
     )
 }

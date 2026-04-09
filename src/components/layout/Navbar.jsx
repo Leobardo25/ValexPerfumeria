@@ -290,14 +290,14 @@ export default function Navbar({
                             {isFilterMenuOpen && (
                                 <motion.div
                                     initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: "100vh", opacity: 1 }}
+                                    animate={{ height: "100dvh", opacity: 1 }}
                                     exit={{ height: 0, opacity: 0 }}
-                                    className="overflow-y-auto md:overflow-hidden w-screen fixed inset-0 bg-[rgba(26,26,27,0.98)] md:bg-[#151515]/98 backdrop-blur-xl shadow-2xl z-[60]"
+                                    className="overflow-hidden w-screen fixed inset-0 bg-[rgba(26,26,27,0.98)] md:bg-[#151515]/98 backdrop-blur-xl shadow-2xl z-[60] flex flex-col"
                                 >
-                                    <div className="pt-20 md:pt-16 pb-8 h-full flex flex-col w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+                                    <div className="pt-16 pb-6 h-full flex flex-col w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
                                         {/* Header del overlay */}
-                                        <div className="flex items-center justify-between mb-6 md:mb-4 flex-shrink-0">
-                                            <h2 className="text-valex-hueso font-serif text-2xl tracking-widest">FILTROS</h2>
+                                        <div className="flex items-center justify-between mb-4 flex-shrink-0">
+                                            <h2 className="text-valex-hueso font-serif text-2xl tracking-widest mt-2">FILTROS</h2>
                                             <button 
                                                 onClick={onToggleMobileFilters}
                                                 className="text-valex-gris hover:text-valex-hueso p-2 rounded-lg hover:bg-white/5 transition-colors"
@@ -306,7 +306,7 @@ export default function Navbar({
                                             </button>
                                         </div>
                                         {/* Filters content - flex-1 to fill remaining space */}
-                                        <div className="flex-1 min-h-0">
+                                        <div className="flex-1 min-h-0 w-full overflow-hidden flex flex-col">
                                             {mobileFiltersNode}
                                         </div>
                                     </div>

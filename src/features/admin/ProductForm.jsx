@@ -19,6 +19,8 @@ export default function ProductForm() {
         notes: '',
         description: '',
         price: '',
+        currency: 'CRC',
+        ml: '100', // Valor por defecto común en perfumes
         stock: 'Disponible',
         isFeatured: false
     });
@@ -48,6 +50,8 @@ export default function ProductForm() {
                             notes: data.notes || '',
                             description: data.description || '',
                             price: data.price || '',
+                            currency: data.currency || 'USD',
+                            ml: data.ml || '100',
                             stock: data.stock || 'Disponible',
                             isFeatured: data.isFeatured || false
                         });
@@ -217,12 +221,15 @@ export default function ProductForm() {
                         <textarea name="description" value={formData.description} onChange={handleChange} rows="4" className="w-full bg-valex-negro border border-valex-gris/20 text-valex-hueso rounded-lg px-4 py-3 focus:outline-none focus:border-valex-bronce transition-colors resize-none" placeholder="Cuenta la historia e inspiración emocional de esta fragancia..." />
                     </div>
 
-                    {/* Precio */}
+                    {/* Precio y Moneda */}
                     <div className="space-y-2">
-                        <label className="text-valex-gris text-sm font-medium">Precio Exclusivo (Opcional)</label>
-                        <div className="relative">
-                            <span className="absolute left-3 top-3 text-valex-gris">$</span>
-                            <input type="number" name="price" value={formData.price} onChange={handleChange} className="w-full bg-valex-negro border border-valex-gris/20 text-valex-hueso rounded-lg pl-8 pr-4 py-3 focus:outline-none focus:border-valex-bronce transition-colors" placeholder="0.00" />
+                        <label className="text-valex-gris text-sm font-medium">Precio y Moneda *</label>
+                        <div className="flex gap-2">
+                            <select name="currency" value={formData.currency} onChange={handleChange} className="bg-valex-negro border border-valex-gris/20 text-valex-hueso rounded-lg px-3 py-3 focus:outline-none focus:border-valex-bronce transition-colors shrink-0">
+                                <option value="CRC">CRC (₡)</option>
+                                <option value="USD">USD ($)</option>
+                            </select>
+                            <input required type="number" name="price" value={formData.price} onChange={handleChange} className="w-full bg-valex-negro border border-valex-gris/20 text-valex-hueso rounded-lg px-4 py-3 focus:outline-none focus:border-valex-bronce transition-colors font-sans" placeholder={formData.currency === 'CRC' ? 'Ej. 45000' : 'Ej. 89.99'} />
                         </div>
                     </div>
 
@@ -234,6 +241,15 @@ export default function ProductForm() {
                             <option value="Agotado">Agotado Temporalmente</option>
                             <option value="Bóveda (Retirado)">En la Bóveda (Oculto)</option>
                         </select>
+                    </div>
+
+                    {/* Mililitros (ml) */}
+                    <div className="space-y-2">
+                        <label className="text-valex-gris text-sm font-medium">Contenido Neto (ml)</label>
+                        <div className="relative">
+                            <input type="number" name="ml" value={formData.ml} onChange={handleChange} className="w-full bg-valex-negro border border-valex-gris/20 text-valex-hueso rounded-lg px-4 py-3 focus:outline-none focus:border-valex-bronce transition-colors font-sans pr-12" placeholder="Ej. 100" />
+                            <span className="absolute right-4 top-3 text-valex-gris font-sans font-medium">ml</span>
+                        </div>
                     </div>
 
                     {/* Sección Multimedia (Portada y Galería) */}

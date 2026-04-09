@@ -11,19 +11,20 @@ export default function Landing() {
     const [showFloatingBtn, setShowFloatingBtn] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
 
+    // Usamos el hook nativo de Window para que Navbar.jsx entienda si el panel ha bajado
     useEffect(() => {
         const handleScroll = () => {
-            setShowFloatingBtn(window.scrollY > window.innerHeight * 0.3)
+            setShowFloatingBtn(window.scrollY > 200);
         }
         window.addEventListener('scroll', handleScroll)
         return () => window.removeEventListener('scroll', handleScroll)
     }, [])
 
     return (
-        <div className="min-h-screen bg-valex-negro overflow-x-hidden">
+        <div className="min-h-screen w-full bg-valex-negro overflow-x-hidden relative">
             <Navbar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
             
-            <main>
+            <main className="w-full">
                 <Hero />
                 <FeaturedProducts />
                 <Moodboard />
@@ -31,14 +32,14 @@ export default function Landing() {
             
             <Footer />
 
-            {/* Floating WhatsApp button — animated entrance */}
+            {/* Floating WhatsApp button */}
             <AnimatePresence>
                 {showFloatingBtn && !menuOpen && (
                     <motion.a
                         href="https://wa.me/xxxxxxxxxx"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="fixed bottom-6 right-4 z-30 flex items-center justify-center w-14 h-14 bg-valex-bronce rounded-full animate-glow-pulse hover:scale-110 transition-transform duration-500 ease-out shadow-xl"
+                        className="fixed bottom-6 right-4 z-30 flex items-center justify-center w-14 h-14 bg-valex-bronce rounded-full hover:scale-110 transition-transform duration-500 ease-out shadow-xl animate-glow-pulse"
                         initial={{ opacity: 0, y: 20, scale: 0.8 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.8 }}
