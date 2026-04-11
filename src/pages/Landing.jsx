@@ -5,6 +5,7 @@ import Navbar from '../components/layout/Navbar'
 import Hero from '../features/landing/Hero'
 import FeaturedProducts from '../features/landing/FeaturedProducts'
 import Moodboard from '../features/landing/Moodboard'
+import FAQ from '../features/landing/FAQ'
 import Footer from '../components/layout/Footer'
 
 export default function Landing() {
@@ -28,6 +29,7 @@ export default function Landing() {
                 <Hero />
                 <FeaturedProducts />
                 <Moodboard />
+                <FAQ />
             </main>
             
             <Footer />

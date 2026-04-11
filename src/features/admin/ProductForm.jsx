@@ -1,11 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createProduct, getProductById, updateProduct } from '../../services/productService';
 import { toast } from 'react-toastify';
+import { ImagePlus, Save } from 'lucide-react';
 
-export default function ProductForm() {
-    const { id } = useParams(); // Si hay ID en la ruta, es modo EDICION
+export default function ProductForm({ productId: propProductId, onClose, onSaved, onDirtyChange, formId }) {
+    const { id: paramId } = useParams();
+    const id = propProductId ?? paramId;
     const isEditMode = Boolean(id);
+    const isSidebarMode = Boolean(onClose);
     const navigate = useNavigate();
 
     const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +25,8 @@ export default function ProductForm() {
         currency: 'CRC',
         ml: '100', // Valor por defecto común en perfumes
         stock: 'Disponible',
-        isFeatured: false
+        isFeatured: false,
+        quantity: 0
     });
     
     // Manejo de imágenes (Portada y Galería)
@@ -31,7 +35,10 @@ export default function ProductForm() {
 
     const [galleryFiles, setGalleryFiles] = useState([]);
     const [galleryPreviews, setGalleryPreviews] = useState([]); 
-    const [oldGalleryUrls, setOldGalleryUrls] = useState([]); // Mantener estado de las imágenes viejas de la nube
+    const [oldGalleryUrls, setOldGalleryUrls] = useState([]);
+
+    const initialDataRef = useRef(null);
+    const dirtyInitRef = useRef(false);
 
     // Familias Olfativas disponibles (Misma que en la tienda)
     const FAMILIES = ['Amaderado', 'Floral', 'Cítrico', 'Dulce', 'Acuático', 'Oriental', 'Cuero'];
@@ -53,7 +60,8 @@ export default function ProductForm() {
                             currency: data.currency || 'USD',
                             ml: data.ml || '100',
                             stock: data.stock || 'Disponible',
-                            isFeatured: data.isFeatured || false
+                            isFeatured: data.isFeatured || false,
+                            quantity: data.quantity ?? 0
                         });
                         
                         // Cargar portada principal
@@ -79,6 +87,23 @@ export default function ProductForm() {
             fetchProduct();
         }
     }, [id, isEditMode, navigate]);
+
+    // Snapshot inicial para detectar cambios
+    useEffect(() => {
+        if (!isFetchingInfo && !dirtyInitRef.current) {
+            initialDataRef.current = JSON.stringify(formData);
+            dirtyInitRef.current = true;
+        }
+    }, [isFetchingInfo, formData]);
+
+    // Notificar al padre si hay cambios sin guardar
+    useEffect(() => {
+        if (!onDirtyChange || !initialDataRef.current) return;
+        const dirty = JSON.stringify(formData) !== initialDataRef.current
+            || Boolean(coverFile)
+            || galleryFiles.length > 0;
+        onDirtyChange(dirty);
+    }, [formData, coverFile, galleryFiles, onDirtyChange]);
 
     // Manejador genérico de campos de texto
     const handleChange = (e) => {
@@ -113,8 +138,20 @@ export default function ProductForm() {
 
     // Remover imagen de galería por índice temporal
     const removeGalleryPreview = (index) => {
-        // Lógica de UI básica: remueve la previsualización por índice. No purga los Files físicamente en esta iteración.
         setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
+        setOldGalleryUrls(prevOld => {
+            if (index < prevOld.length) {
+                // Es una imagen vieja pre-existente
+                return prevOld.filter((_, i) => i !== index);
+            } else {
+                // Es un archivo nuevo. Ocurre fuera de prevOld, usamos callback the setGalleryFiles
+                setGalleryFiles(prevFiles => {
+                    const fileIndex = index - prevOld.length;
+                    return prevFiles.filter((_, i) => i !== fileIndex);
+                });
+                return prevOld;
+            }
+        });
     };
 
     // Enviar el formulario a Base de datos (Crear o Actualizar)
@@ -130,218 +167,180 @@ export default function ProductForm() {
             const cleanData = { ...formData, price: Number(formData.price) || 0 };
 
             if (isEditMode) {
-                // oldGalleryUrls is sent so the backend merges previous gallery with new ones.
                 await updateProduct(id, cleanData, coverFile, coverPreview, galleryFiles, oldGalleryUrls);
-                toast.success('¡Perfume actualizado con éxito!');
+                toast.success('¡Producto actualizado!');
             } else {
-                // Creando nuevo
                 await createProduct(cleanData, coverFile, galleryFiles);
-                toast.success('¡Perfume añadido al catálogo!');
+                toast.success('¡Producto guardado!');
             }
-            navigate('/admin/inventory');
+            onDirtyChange?.(false);
+            if (isSidebarMode) { onSaved?.(); } else { navigate('/admin/inventory'); }
         } catch (error) {
-            toast.error(`Error guardando producto: ${error.message}`);
+            toast.error(`Error: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
     };
 
     if (isFetchingInfo) {
-        return <div className="text-valex-gris animate-pulse">Cargando base de datos...</div>;
+        return <div className="text-gray-400 animate-pulse p-6">Cargando producto...</div>;
     }
 
     return (
-        <div className="max-w-4xl mx-auto">
-            <header className="mb-8 flex items-center justify-between">
-                <div>
-                    <h2 className="text-3xl font-serif text-valex-hueso">{isEditMode ? 'Editar Perfume' : 'Añadir Nuevo Perfume'}</h2>
-                    <p className="text-valex-gris font-sans text-sm mt-1">Completa los detalles de esta fragancia para el catálogo.</p>
-                </div>
-                <button 
-                    onClick={() => navigate('/admin/inventory')}
-                    className="text-valex-gris hover:text-valex-bronce text-sm border border-valex-gris/20 px-4 py-2 rounded-lg transition-colors"
-                >
-                    Volver al Inventario
-                </button>
-            </header>
+        <div className={isSidebarMode ? '' : 'max-w-4xl mx-auto'}>
+            {!isSidebarMode && (
+                <header className="mb-8 flex items-center justify-between">
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">{isEditMode ? 'Editar Producto' : 'Nuevo Producto'}</h1>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Completa los detalles de esta fragancia.</p>
+                    </div>
+                    <button onClick={() => navigate('/admin/inventory')} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-sm border border-gray-300 dark:border-white/10 px-4 py-2 rounded-lg transition-colors">
+                        Volver
+                    </button>
+                </header>
+            )}
 
-            <form onSubmit={handleSubmit} className="bg-[#1e1e1f] border border-valex-gris/10 rounded-2xl p-6 sm:p-10 shadow-xl space-y-6">
+            <form id={formId} onSubmit={handleSubmit} className="space-y-5">
                 
                 {/* Switch DESTACADO */}
-                <div className="flex items-center gap-4 bg-valex-bronce/10 p-4 rounded-xl border border-valex-bronce/20 mb-6">
+                <div className="flex items-center gap-3 bg-white dark:bg-[#1A1A1B] p-4 rounded-xl border border-gray-200 dark:border-white/5">
                     <label className="relative inline-flex items-center cursor-pointer">
-                        <input 
-                            type="checkbox" 
-                            name="isFeatured"
-                            checked={formData.isFeatured}
-                            onChange={handleChange}
-                            className="sr-only peer" 
-                        />
-                        <div className="w-11 h-6 bg-valex-negro rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-valex-gris after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-valex-bronce"></div>
-                        <span className="ml-3 text-sm font-medium text-valex-hueso">Destacar en la Portada (Hero Section / Colecciones)</span>
+                        <input type="checkbox" name="isFeatured" checked={formData.isFeatured} onChange={handleChange} className="sr-only peer" />
+                        <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                        <span className="ml-3 text-sm font-medium text-gray-700">Destacar en portada y colecciones</span>
                     </label>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Nombre */}
-                    <div className="space-y-2">
-                        <label className="text-valex-gris text-sm font-medium">Nombre de la Fragancia *</label>
-                        <input required type="text" name="name" value={formData.name} onChange={handleChange} className="w-full bg-valex-negro border border-valex-gris/20 text-valex-hueso rounded-lg px-4 py-3 focus:outline-none focus:border-valex-bronce transition-colors" placeholder="Ej. Oud Mystique" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Nombre *</label>
+                        <input required type="text" name="name" value={formData.name} onChange={handleChange} className="w-full border border-gray-300 dark:border-white/10 bg-white dark:bg-[#111113] text-gray-800 dark:text-gray-100 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" placeholder="Ej. Oud Mystique" />
                     </div>
 
-                    {/* Categoría */}
-                    <div className="space-y-2">
-                        <label className="text-valex-gris text-sm font-medium">Categoría / Género</label>
-                        <select name="category" value={formData.category} onChange={handleChange} className="w-full bg-valex-negro border border-valex-gris/20 text-valex-hueso rounded-lg px-4 py-3 focus:outline-none focus:border-valex-bronce transition-colors">
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Género</label>
+                        <select name="category" value={formData.category} onChange={handleChange} className="w-full border border-gray-300 dark:border-white/10 bg-white dark:bg-[#111113] text-gray-800 dark:text-gray-100 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition bg-white">
                             <option value="Unisex">Unisex</option>
                             <option value="Femenino">Femenino</option>
                             <option value="Masculino">Masculino</option>
                         </select>
                     </div>
 
-                    {/* Familia Olfativa */}
-                    <div className="space-y-2 md:col-span-2">
-                        <label className="text-valex-gris text-sm font-medium">Familia Olfativa Principal</label>
-                        <select name="family" value={formData.family} onChange={handleChange} className="w-full bg-valex-negro border border-valex-gris/20 text-valex-hueso rounded-lg px-4 py-3 focus:outline-none focus:border-valex-bronce transition-colors">
-                            {FAMILIES.map(fam => (
-                                <option key={fam} value={fam}>{fam}</option>
-                            ))}
+                    <div className="space-y-1.5 md:col-span-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Familia Olfativa</label>
+                        <select name="family" value={formData.family} onChange={handleChange} className="w-full border border-gray-300 dark:border-white/10 bg-white dark:bg-[#111113] text-gray-800 dark:text-gray-100 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition bg-white">
+                            {FAMILIES.map(fam => <option key={fam} value={fam}>{fam}</option>)}
                         </select>
                     </div>
 
-                    {/* Notas (Acordes) */}
-                    <div className="space-y-2 md:col-span-2">
-                        <label className="text-valex-gris text-sm font-medium">Notas Olfativas Principales</label>
-                        <input type="text" name="notes" value={formData.notes} onChange={handleChange} className="w-full bg-valex-negro border border-valex-gris/20 text-valex-hueso rounded-lg px-4 py-3 focus:outline-none focus:border-valex-bronce transition-colors" placeholder="Ej. Madera de oud · Ámbar · Sándalo" />
+                    <div className="space-y-1.5 md:col-span-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Notas Olfativas</label>
+                        <input type="text" name="notes" value={formData.notes} onChange={handleChange} className="w-full border border-gray-300 dark:border-white/10 bg-white dark:bg-[#111113] text-gray-800 dark:text-gray-100 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" placeholder="Ej. Madera de oud · Ámbar · Sándalo" />
                     </div>
 
-                    {/* Descripción Larga */}
-                    <div className="space-y-2 md:col-span-2">
-                        <label className="text-valex-gris text-sm font-medium">Descripción Literaria</label>
-                        <textarea name="description" value={formData.description} onChange={handleChange} rows="4" className="w-full bg-valex-negro border border-valex-gris/20 text-valex-hueso rounded-lg px-4 py-3 focus:outline-none focus:border-valex-bronce transition-colors resize-none" placeholder="Cuenta la historia e inspiración emocional de esta fragancia..." />
+                    <div className="space-y-1.5 md:col-span-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
+                        <textarea name="description" value={formData.description} onChange={handleChange} rows="6" className="w-full border border-gray-300 dark:border-white/10 bg-white dark:bg-[#111113] text-gray-800 dark:text-gray-100 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition resize-y min-h-[120px]" placeholder="Descripción de la fragancia..." />
                     </div>
 
-                    {/* Precio y Moneda */}
-                    <div className="space-y-2">
-                        <label className="text-valex-gris text-sm font-medium">Precio y Moneda *</label>
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Precio *</label>
                         <div className="flex gap-2">
-                            <select name="currency" value={formData.currency} onChange={handleChange} className="bg-valex-negro border border-valex-gris/20 text-valex-hueso rounded-lg px-3 py-3 focus:outline-none focus:border-valex-bronce transition-colors shrink-0">
-                                <option value="CRC">CRC (₡)</option>
-                                <option value="USD">USD ($)</option>
+                            <select name="currency" value={formData.currency} onChange={handleChange} className="border border-gray-300 dark:border-white/10 bg-white dark:bg-[#111113] text-gray-800 dark:text-gray-100 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition bg-white shrink-0">
+                                <option value="CRC">₡ CRC</option>
+                                <option value="USD">$ USD</option>
                             </select>
-                            <input required type="number" name="price" value={formData.price} onChange={handleChange} className="w-full bg-valex-negro border border-valex-gris/20 text-valex-hueso rounded-lg px-4 py-3 focus:outline-none focus:border-valex-bronce transition-colors font-sans" placeholder={formData.currency === 'CRC' ? 'Ej. 45000' : 'Ej. 89.99'} />
+                            <input required type="number" name="price" value={formData.price} onChange={handleChange} className="w-full border border-gray-300 dark:border-white/10 bg-white dark:bg-[#111113] text-gray-800 dark:text-gray-100 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" placeholder={formData.currency === 'CRC' ? '45000' : '89.99'} />
                         </div>
                     </div>
 
-                    {/* Inventario/Stock */}
-                    <div className="space-y-2">
-                        <label className="text-valex-gris text-sm font-medium">Estado del Producto</label>
-                        <select name="stock" value={formData.stock} onChange={handleChange} className="w-full bg-valex-negro border border-valex-gris/20 text-valex-hueso rounded-lg px-4 py-3 focus:outline-none focus:border-valex-bronce transition-colors">
-                            <option value="Disponible">Disponible (En Stock)</option>
-                            <option value="Agotado">Agotado Temporalmente</option>
-                            <option value="Bóveda (Retirado)">En la Bóveda (Oculto)</option>
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
+                        <select name="stock" value={formData.stock} onChange={handleChange} className="w-full border border-gray-300 dark:border-white/10 bg-white dark:bg-[#111113] text-gray-800 dark:text-gray-100 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition bg-white">
+                            <option value="Disponible">Disponible</option>
+                            <option value="Agotado">Agotado</option>
+                            <option value="Bóveda (Retirado)">Retirado (Oculto)</option>
                         </select>
                     </div>
 
-                    {/* Mililitros (ml) */}
-                    <div className="space-y-2">
-                        <label className="text-valex-gris text-sm font-medium">Contenido Neto (ml)</label>
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Unidades en stock</label>
+                        <p className="text-xs text-gray-400">Solo visible en el panel de administración, no se muestra al cliente.</p>
+                        <input type="number" name="quantity" min="0" value={formData.quantity} onChange={handleChange} className="w-full border border-gray-300 dark:border-white/10 bg-white dark:bg-[#111113] text-gray-800 dark:text-gray-100 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" placeholder="0" />
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Contenido (ml)</label>
                         <div className="relative">
-                            <input type="number" name="ml" value={formData.ml} onChange={handleChange} className="w-full bg-valex-negro border border-valex-gris/20 text-valex-hueso rounded-lg px-4 py-3 focus:outline-none focus:border-valex-bronce transition-colors font-sans pr-12" placeholder="Ej. 100" />
-                            <span className="absolute right-4 top-3 text-valex-gris font-sans font-medium">ml</span>
+                            <input type="number" name="ml" value={formData.ml} onChange={handleChange} className="w-full border border-gray-300 dark:border-white/10 bg-white dark:bg-[#111113] text-gray-800 dark:text-gray-100 rounded-lg px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" placeholder="100" />
+                            <span className="absolute right-3 top-2.5 text-xs text-gray-400 font-medium">ml</span>
                         </div>
                     </div>
 
-                    {/* Sección Multimedia (Portada y Galería) */}
-                    <div className="space-y-6 md:col-span-2 mt-4 pt-6 border-t border-valex-gris/10">
-                        <h3 className="text-lg font-serif text-valex-hueso">Archivos Multimedia</h3>
-                        
-                        {/* Imagen Principal (Portada) */}
-                        <div className="bg-valex-negro/50 p-6 rounded-xl border border-valex-gris/10">
-                            <label className="text-valex-gris text-sm font-medium mb-3 block">Imagen de Portada Principal *</label>
-                            <div className="flex flex-col sm:flex-row items-center gap-6">
-                                <div className="w-32 h-40 bg-valex-negro border-2 border-dashed border-valex-gris/20 rounded-xl overflow-hidden flex items-center justify-center shrink-0">
-                                    {coverPreview ? (
-                                        <img src={coverPreview} alt="Cover Preview" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <span className="text-valex-gris/40 text-xs text-center px-2">Sin Portada</span>
-                                    )}
+                    <div className="space-y-4 md:col-span-2 pt-4 border-t border-gray-200">
+                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Imágenes</p>
+
+                        <div className="bg-gray-50 dark:bg-[#1A1A1B] p-4 rounded-xl border border-gray-200 dark:border-white/5">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Portada Principal *</label>
+                            <p className="text-xs text-indigo-500 mb-3">Esta imagen se muestra en la sección Tienda y en los resultados del catálogo.</p>
+                            <div className="flex items-center gap-4">
+                                <div className="w-24 h-24 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
+                                    {coverPreview
+                                        ? <img src={coverPreview} alt="Portada" className="w-full h-full object-contain" />
+                                        : <ImagePlus className="w-6 h-6 text-gray-300" />
+                                    }
                                 </div>
-                                <div className="flex-1 w-full">
-                                    <input 
-                                        type="file" 
-                                        accept="image/*" 
-                                        onChange={handleCoverChange}
-                                        className="block w-full text-sm text-valex-gris file:mr-4 file:py-3 file:px-6 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-valex-bronce file:text-valex-negro hover:file:bg-valex-bronce/90 file:cursor-pointer transition-all"
-                                    />
-                                    <p className="text-xs text-valex-gris mt-2">Ésta imagen aparecerá en la página principal y búsquedas.</p>
+                                <div className="flex-1">
+                                    <input type="file" accept="image/*" onChange={handleCoverChange} className="block w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 file:cursor-pointer" />
                                 </div>
                             </div>
                         </div>
 
-                        {/* Imágenes de Galería Múltiple */}
-                        <div className="bg-valex-negro/50 p-6 rounded-xl border border-valex-gris/10">
-                            <label className="text-valex-gris text-sm font-medium mb-3 block">Imágenes de la Galería (Carrusel de Detalles)</label>
-                            
-                            <div className="flex-1 w-full mb-6">
-                                <input 
-                                    type="file" 
-                                    accept="image/*" 
-                                    multiple
-                                    onChange={handleGalleryChange}
-                                    className="block w-full text-sm text-valex-gris file:mr-4 file:py-3 file:px-6 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#333] file:text-valex-hueso hover:file:bg-valex-gris/20 file:cursor-pointer transition-all"
-                                />
-                                <p className="text-xs text-valex-gris mt-2">Puedes seleccionar múltiples archivos a la vez. Aparecerán listadas abajo.</p>
-                            </div>
-
-                            {/* Previsualización en mini-cuadrícula */}
-                            {galleryPreviews.length > 0 && (
-                                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
-                                    {galleryPreviews.map((previewSrc, index) => (
-                                        <div key={index} className="relative aspect-[3/4] bg-valex-negro border border-valex-gris/20 rounded-lg overflow-hidden group">
-                                            <img src={previewSrc} alt={`Gallery Preview ${index}`} className="w-full h-full object-cover" />
-                                            {/* Nota: Lógica simple de borrado para el preview visual */}
-                                            <button 
-                                                type="button" 
-                                                onClick={() => removeGalleryPreview(index)}
-                                                className="absolute top-1 right-1 bg-red-500/80 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
-                                            >
-                                                ✕
-                                            </button>
+                        <div className="bg-gray-50 dark:bg-[#1A1A1B] p-4 rounded-xl border border-gray-200 dark:border-white/5">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Galería (carrusel de detalles)</label>
+                            <p className="text-xs text-indigo-500 mb-3">Estas imágenes sólo se muestran al abrir el detalle del producto en la tienda.</p>
+                            <input type="file" accept="image/*" multiple onChange={handleGalleryChange} className="block w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 file:cursor-pointer mb-3" />
+                            {galleryPreviews.length > 0 ? (
+                                <div className="grid grid-cols-4 gap-2">
+                                    {galleryPreviews.map((src, i) => (
+                                        <div key={i} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group">
+                                            <img src={src} alt={`Galería ${i}`} className="w-full h-full object-contain" />
+                                            <button type="button" onClick={() => removeGalleryPreview(i)} className="absolute top-1 right-1 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs">✕</button>
                                         </div>
                                     ))}
                                 </div>
-                            )}
-                            {galleryPreviews.length === 0 && (
-                                <div className="w-full py-8 border-2 border-dashed border-valex-gris/20 rounded-xl flex items-center justify-center">
-                                    <span className="text-valex-gris/40 text-sm">Sin imágenes en la galería</span>
+                            ) : (
+                                <div className="py-6 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center">
+                                    <span className="text-gray-400 text-xs">Sin imágenes en la galería</span>
                                 </div>
                             )}
                         </div>
                     </div>
                 </div>
 
-                <div className="pt-6 mt-4 border-t border-valex-gris/10 flex justify-end gap-4">
-                    <button 
-                        type="button" 
-                        onClick={() => navigate('/admin/inventory')}
-                        disabled={isLoading}
-                        className="px-6 py-3 text-valex-hueso hover:bg-valex-gris/10 rounded-lg transition-colors font-medium border border-transparent disabled:opacity-50"
-                    >
-                        Cancelar
-                    </button>
-                    <button 
-                        type="submit" 
-                        disabled={isLoading}
-                        className="bg-valex-hueso text-valex-negro px-8 py-3 rounded-lg font-medium hover:bg-white transition-colors flex items-center gap-2 disabled:opacity-70"
-                    >
-                        {isLoading ? (
-                            <><span className="w-4 h-4 border-2 border-valex-negro/20 border-t-valex-negro rounded-full animate-spin"></span> Conectando BD...</>
-                        ) : (
-                            <>{isEditMode ? 'Actualizar Producto' : 'Macerar y Guardar'}</>
-                        )}
-                    </button>
-                </div>
+                {!isSidebarMode && (
+                    <div className="pt-5 mt-2 border-t border-gray-200 dark:border-white/5 flex justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={() => navigate('/admin/inventory')}
+                            disabled={isLoading}
+                            className="px-5 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors font-medium border border-gray-200 dark:border-white/10 disabled:opacity-50"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="bg-indigo-600 text-white px-6 py-2.5 text-sm rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2 disabled:opacity-70"
+                        >
+                            {isLoading ? (
+                                <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Guardando...</>
+                            ) : (
+                                isEditMode ? 'Actualizar' : 'Guardar producto'
+                            )}
+                        </button>
+                    </div>
+                )}
             </form>
         </div>
     );

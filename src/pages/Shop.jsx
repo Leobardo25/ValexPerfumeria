@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/firebase';
 import { Layout, Row, Col, Card, Button, Badge, Skeleton, Radio, Checkbox, Slider, Collapse, Typography, FloatButton, Drawer, notification, ConfigProvider, theme as antTheme, Grid, Input } from 'antd';
-import { ShoppingCartOutlined, FilterOutlined, SearchOutlined, PictureOutlined, BgColorsOutlined } from '@ant-design/icons';
+import { FilterOutlined, SearchOutlined, PictureOutlined, BgColorsOutlined } from '@ant-design/icons';
+import { ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useProductDrawer } from '../context/ProductDrawerContext';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 
@@ -277,7 +279,7 @@ export default function Shop() {
                                                     <Col md={8} lg={6} key={product.id}>
                                                         <motion.div layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.35 }} className="h-full">
                                                             <CardBadgeWrap product={product}>
-                                                                <DesktopCard product={product} useBg={useBgImages} />
+                                                                <DesktopCard product={product} useBg={useBgImages} onAddToCart={handleAddToCart} />
                                                             </CardBadgeWrap>
                                                         </motion.div>
                                                     </Col>
@@ -285,30 +287,48 @@ export default function Shop() {
                                             </Row>
                                         </div>
 
-                                        {/* ── VISTA MÓVIL LISTA (hidden en PC, hidden si compactView) ── */}
-                                        <div className={`md:hidden ${isCompactView ? 'hidden' : 'flex flex-col gap-6'}`}>
-                                            {filteredProducts.map(product => (
-                                                <motion.div key={product.id} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
-                                                    <CardBadgeWrap product={product}>
-                                                        <MobileCard product={product} useBg={useBgImages} />
-                                                    </CardBadgeWrap>
-                                                </motion.div>
-                                            ))}
-                                        </div>
-
-                                        {/* ── VISTA MÓVIL CUADRÍCULA (hidden en PC, hidden si NO compactView) ── */}
-                                        <div className={`md:hidden ${isCompactView ? 'block' : 'hidden'}`}>
-                                            <Row gutter={[12, 16]}>
-                                                {filteredProducts.map(product => (
-                                                    <Col xs={12} key={product.id}>
-                                                        <motion.div layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.35 }} className="h-full">
-                                                            <CardBadgeWrap product={product}>
-                                                                <MobileCompactCard product={product} useBg={useBgImages} />
-                                                            </CardBadgeWrap>
-                                                        </motion.div>
-                                                    </Col>
-                                                ))}
-                                            </Row>
+                                        {/* ── VISTA MÓVIL (animada entre lista y cuadrícula) ── */}
+                                        <div className="md:hidden overflow-hidden">
+                                            <AnimatePresence mode="wait">
+                                                {!isCompactView ? (
+                                                    <motion.div
+                                                        key="mobile-list"
+                                                        initial={{ opacity: 0, y: 20 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        exit={{ opacity: 0, y: -20 }}
+                                                        transition={{ duration: 0.25, ease: 'easeInOut' }}
+                                                        className="flex flex-col gap-6"
+                                                    >
+                                                        {filteredProducts.map((product) => (
+                                                            <div key={product.id}>
+                                                                <CardBadgeWrap product={product}>
+                                                                    <MobileCard product={product} useBg={useBgImages} onAddToCart={handleAddToCart} />
+                                                                </CardBadgeWrap>
+                                                            </div>
+                                                        ))}
+                                                    </motion.div>
+                                                ) : (
+                                                    <motion.div
+                                                        key="mobile-grid"
+                                                        initial={{ opacity: 0, y: 20 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        exit={{ opacity: 0, y: -20 }}
+                                                        transition={{ duration: 0.25, ease: 'easeInOut' }}
+                                                    >
+                                                        <Row gutter={[12, 16]}>
+                                                            {filteredProducts.map((product) => (
+                                                                <Col xs={12} key={product.id}>
+                                                                    <div className="h-full">
+                                                                        <CardBadgeWrap product={product}>
+                                                                            <MobileCompactCard product={product} useBg={useBgImages} />
+                                                                        </CardBadgeWrap>
+                                                                    </div>
+                                                                </Col>
+                                                            ))}
+                                                        </Row>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
                                         </div>
                                     </>
                                 )}
@@ -357,8 +377,9 @@ const CardBadgeWrap = ({ product, children }) => {
 // ══════════════════════════════════════════════════
 //  1. TARJETA PC (Desktop) — 4 columnas, compacta
 // ══════════════════════════════════════════════════
-const DesktopCard = ({ product, useBg }) => {
+const DesktopCard = ({ product, useBg, onAddToCart }) => {
     const navigate = useNavigate();
+    const { openProductDrawer } = useProductDrawer();
     const isOutOfStock = product.stock === 'Agotado' || product.stock === 0;
     const hasBg = product.galleryImages && product.galleryImages.length > 0;
     const imgUrl = useBg && hasBg ? product.galleryImages[0] : (product.coverImage || product.imageUrl);
@@ -366,14 +387,17 @@ const DesktopCard = ({ product, useBg }) => {
     return (
         <Card
             hoverable
-            onClick={() => navigate(`/producto/${product.id}`)}
+            onClick={() => openProductDrawer(product)}
             className="overflow-hidden border-valex-gris/10 group bg-[#1e1e1f] h-full flex flex-col transition-all duration-500 hover:border-valex-bronce/30 shadow-none hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)] cursor-pointer"
             cover={
                 <div className="relative aspect-square overflow-hidden bg-transparent">
                     {imgUrl ? (
-                        <div 
-                            className="w-full h-full bg-center bg-no-repeat bg-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105"
-                            style={{ backgroundImage: `url(${imgUrl})`, filter: isOutOfStock ? 'grayscale(100%) opacity(70%)' : 'none' }}
+                        <img 
+                            src={imgUrl}
+                            alt={product.name}
+                            loading="lazy"
+                            className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105"
+                            style={{ filter: isOutOfStock ? 'grayscale(100%) opacity(70%)' : 'none' }}
                         />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center bg-valex-negro">
@@ -382,19 +406,29 @@ const DesktopCard = ({ product, useBg }) => {
                     )}
                 </div>
             }
-            bodyStyle={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '12px 16px' }}
+            styles={{ body: { flex: 1, display: 'flex', flexDirection: 'column', padding: '12px 16px' } }}
         >
             <div className="text-[10px] font-sans tracking-[0.2em] text-valex-gris uppercase mb-0.5">{product.category}</div>
-            <Typography.Title level={5} className="!font-serif !text-valex-hueso !mt-0 !mb-0.5 group-hover:!text-valex-bronce transition-colors !text-sm lg:!text-base">
+            <Typography.Title level={5} className="!font-sans !font-semibold !text-valex-hueso !mt-0 !mb-0.5 group-hover:!text-valex-bronce transition-colors !text-sm lg:!text-base">
                 {product.name}
             </Typography.Title>
             <div className="text-[11px] text-valex-gris/60 font-sans tracking-wide mb-2">{product.family || '—'}</div>
             <div className="mt-auto flex items-center justify-between pt-2 border-t border-valex-gris/10">
                 <span className="font-sans font-medium text-valex-bronce text-base tracking-wide">{formatPrice(product.price, product.currency === 'CRC')}</span>
-                <button 
-                    onClick={(e) => { e.stopPropagation(); navigate(`/producto/${product.id}`); }}
-                    className="text-[10px] font-sans uppercase tracking-[0.2em] text-valex-bronce hover:text-valex-hueso transition-all duration-300 border-b border-valex-bronce/30 hover:border-valex-hueso pb-0.5"
-                >VER</button>
+                <div className="flex items-center gap-3">
+                    <button 
+                        onClick={(e) => { e.stopPropagation(); openProductDrawer(product); }}
+                        className="text-[10px] font-sans uppercase tracking-[0.2em] text-valex-bronce hover:text-valex-hueso transition-all duration-300 border-b border-valex-bronce/30 hover:border-valex-hueso pb-0.5"
+                    >VER</button>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onAddToCart(product); }}
+                        disabled={isOutOfStock}
+                        className="text-valex-bronce hover:text-valex-hueso transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-valex-bronce/10 p-1.5 rounded-full"
+                        title="Añadir a Bolsa"
+                    >
+                        <ShoppingBag className="w-[18px] h-[18px]" />
+                    </button>
+                </div>
             </div>
         </Card>
     );
@@ -404,8 +438,9 @@ const DesktopCard = ({ product, useBg }) => {
 //  2. TARJETA MÓVIL LISTA — scroll natural
 //     Imagen 4:5, info compacta y legible
 // ══════════════════════════════════════════════════
-const MobileCard = ({ product, useBg }) => {
+const MobileCard = ({ product, useBg, onAddToCart }) => {
     const navigate = useNavigate();
+    const { openProductDrawer } = useProductDrawer();
     const isOutOfStock = product.stock === 'Agotado' || product.stock === 0;
     const hasBg = product.galleryImages && product.galleryImages.length > 0;
     const imgUrl = useBg && hasBg ? product.galleryImages[0] : (product.coverImage || product.imageUrl);
@@ -413,14 +448,17 @@ const MobileCard = ({ product, useBg }) => {
     return (
         <div 
             className="overflow-hidden rounded-lg border border-valex-gris/10 bg-[#1e1e1f] cursor-pointer group"
-            onClick={() => navigate(`/producto/${product.id}`)}
+            onClick={() => openProductDrawer(product)}
         >
             {/* Imagen — aspect ratio 4:5 */}
             <div className="relative aspect-[4/5] overflow-hidden">
                 {imgUrl ? (
-                    <div 
-                        className="w-full h-full bg-center bg-no-repeat bg-cover"
-                        style={{ backgroundImage: `url(${imgUrl})`, filter: isOutOfStock ? 'grayscale(100%) opacity(70%)' : 'none' }}
+                    <img 
+                        src={imgUrl}
+                        alt={product.name}
+                        loading="lazy"
+                        className="w-full h-full object-cover"
+                        style={{ filter: isOutOfStock ? 'grayscale(100%) opacity(70%)' : 'none' }}
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center bg-valex-negro">
@@ -435,7 +473,7 @@ const MobileCard = ({ product, useBg }) => {
                     <span className="text-[10px] font-sans tracking-[0.2em] text-valex-gris uppercase">{product.category}</span>
                     <span className="text-[10px] font-sans tracking-wide text-valex-gris/50">{product.family || ''}</span>
                 </div>
-                <h3 className="font-serif text-valex-hueso text-xl leading-snug group-hover:text-valex-bronce transition-colors">
+                <h3 className="font-sans font-medium text-valex-hueso text-xs leading-snug group-hover:text-valex-bronce transition-colors line-clamp-2">
                     {product.name}
                 </h3>
                 <p className="text-sm font-light text-valex-gris/60 line-clamp-3 leading-relaxed">
@@ -443,10 +481,21 @@ const MobileCard = ({ product, useBg }) => {
                 </p>
                 <div className="flex items-center justify-between pt-3 border-t border-valex-gris/10 mt-2">
                     <span className="font-sans font-semibold text-valex-bronce text-xl tracking-wide">{formatPrice(product.price, product.currency === 'CRC')}</span>
-                    <button 
-                        onClick={(e) => { e.stopPropagation(); navigate(`/producto/${product.id}`); }}
-                        className="text-xs font-serif uppercase tracking-[0.15em] text-valex-negro bg-valex-bronce px-4 py-1.5 rounded hover:bg-valex-hueso transition-all duration-300"
-                    >VER DETALLES</button>
+                    <div className="flex items-center gap-2">
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); openProductDrawer(product); }}
+                            className="text-xs font-serif uppercase tracking-[0.1em] text-valex-hueso/80 bg-valex-gris/5 px-3 py-1.5 rounded hover:bg-valex-hueso hover:text-valex-negro transition-all duration-300"
+                        >VER</button>
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); onAddToCart(product); }}
+                            disabled={isOutOfStock}
+                            className="flex items-center justify-center bg-valex-bronce text-valex-negro h-8 px-3 rounded hover:bg-valex-hueso transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Añadir a Bolsa"
+                        >
+                            <ShoppingBag className="w-[18px] h-[18px] mr-1.5" />
+                            <span className="text-[10px] uppercase font-serif tracking-[0.1em] font-bold mt-[2px]">AÑADIR</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -458,6 +507,7 @@ const MobileCard = ({ product, useBg }) => {
 // ══════════════════════════════════════════════════
 const MobileCompactCard = ({ product, useBg }) => {
     const navigate = useNavigate();
+    const { openProductDrawer } = useProductDrawer();
     const isOutOfStock = product.stock === 'Agotado' || product.stock === 0;
     const hasBg = product.galleryImages && product.galleryImages.length > 0;
     const imgUrl = useBg && hasBg ? product.galleryImages[0] : (product.coverImage || product.imageUrl);
@@ -465,14 +515,17 @@ const MobileCompactCard = ({ product, useBg }) => {
     return (
         <Card
             hoverable
-            onClick={() => navigate(`/producto/${product.id}`)}
+            onClick={() => openProductDrawer(product)}
             className="overflow-hidden border-valex-gris/10 group bg-[#1e1e1f] h-full flex flex-col shadow-none cursor-pointer"
             cover={
                 <div className="relative aspect-square overflow-hidden bg-transparent">
                     {imgUrl ? (
-                        <div 
-                            className="w-full h-full bg-center bg-no-repeat bg-cover"
-                            style={{ backgroundImage: `url(${imgUrl})`, filter: isOutOfStock ? 'grayscale(100%) opacity(70%)' : 'none' }}
+                        <img 
+                            src={imgUrl}
+                            alt={product.name}
+                            loading="lazy"
+                            className="w-full h-full object-cover"
+                            style={{ filter: isOutOfStock ? 'grayscale(100%) opacity(70%)' : 'none' }}
                         />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center bg-valex-negro">
@@ -481,9 +534,9 @@ const MobileCompactCard = ({ product, useBg }) => {
                     )}
                 </div>
             }
-            bodyStyle={{ padding: '8px 10px' }}
+            styles={{ body: { padding: '8px 10px' } }}
         >
-            <Typography.Title level={5} className="!font-serif !text-valex-hueso !mt-0 !mb-0.5 !text-xs">
+            <Typography.Title level={5} className="!font-sans !font-semibold !text-valex-hueso !mt-0 !mb-0.5 !text-xs">
                 {product.name}
             </Typography.Title>
             <div className="flex items-center justify-between mt-1 border-t border-valex-gris/10 pt-2">

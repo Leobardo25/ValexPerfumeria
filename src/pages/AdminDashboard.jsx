@@ -1,116 +1,130 @@
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Outlet, NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Package, ShoppingBag, Settings, Menu, X, LogOut, Users, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { motion } from 'framer-motion';
-import Logo from '../components/ui/Logo';
+import { AdminThemeProvider, useAdminTheme } from '../context/AdminThemeContext';
+
+const NAV_ITEMS = [
+    { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
+    { to: '/admin/inventory', label: 'Catálogo', icon: Package },
+    { to: '/admin/orders', label: 'Pedidos', icon: ShoppingBag },
+    { to: '/admin/customers', label: 'Clientes', icon: Users },
+    { to: '/admin/landing', label: 'Configuración', icon: Settings },
+];
+
+function AdminLayout() {
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { userData, logout } = useAuth();
+    const { dark, toggle } = useAdminTheme();
+
+    useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
+
+    const handleLogout = async () => {
+        await logout();
+        navigate('/login');
+    };
+
+    const adminName = userData?.nombre || userData?.email || 'Admin';
+
+    return (
+        <div className="flex h-screen bg-gray-50 dark:bg-[#111113] text-gray-900 dark:text-gray-100 overflow-hidden font-sans transition-colors duration-300">
+
+            {sidebarOpen && (
+                <div className="fixed inset-0 z-20 bg-black/30 dark:bg-black/50 backdrop-blur-sm md:hidden" onClick={() => setSidebarOpen(false)} />
+            )}
+
+                <aside className={`fixed inset-y-0 left-0 z-30 flex w-64 flex-col bg-white dark:bg-[#1A1A1B] border-r border-gray-200 dark:border-white/5 shadow-xl transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:sticky md:top-0 md:h-screen md:translate-x-0 md:shadow-none`}>
+
+                    <div className="h-16 flex items-center justify-between px-5 border-b border-gray-100 dark:border-white/5">
+                        <Link to="/" className="flex items-baseline gap-1.5">
+                            <span className="font-bold text-lg tracking-[0.15em] text-indigo-700 dark:text-indigo-400" style={{ fontFamily: '"Montserrat", sans-serif' }}>VALEX</span>
+                            <span className="text-[10px] font-sans tracking-widest text-gray-400 dark:text-gray-500 mt-0.5">ADMIN</span>
+                        </Link>
+                        <button onClick={() => setSidebarOpen(false)} className="p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 md:hidden rounded">
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    <nav className="flex-1 overflow-y-auto scrollbar-admin px-3 py-5">
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-600 px-3 mb-3">Gestión</p>
+                        <ul className="space-y-0.5">
+                            {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+                                <li key={to}>
+                                    <NavLink
+                                        to={to}
+                                        end={end}
+                                        className={({ isActive }) =>
+                                            `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200'}`
+                                        }
+                                    >
+                                        <Icon className="w-4 h-4 flex-shrink-0" />
+                                        {label}
+                                    </NavLink>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
+
+                    <div className="p-4 border-t border-gray-100 dark:border-white/5">
+                        <div className="flex items-center gap-3 mb-3 px-1">
+                            <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-700 dark:text-indigo-400 text-sm font-bold flex-shrink-0">
+                                {adminName.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{adminName}</p>
+                                <p className="text-xs text-gray-400 dark:text-gray-500">Administrador</p>
+                            </div>
+                            <button
+                                onClick={toggle}
+                                className="p-2 rounded-lg text-gray-400 hover:text-amber-500 dark:text-gray-500 dark:hover:text-amber-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+                                title={dark ? 'Modo claro' : 'Modo oscuro'}
+                            >
+                                {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                            </button>
+                        </div>
+                        <button onClick={handleLogout} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors">
+                            <LogOut className="w-4 h-4" />
+                            Cerrar sesión
+                        </button>
+                    </div>
+                </aside>
+
+                <div className="flex flex-1 flex-col overflow-hidden">
+                    <header className="md:hidden sticky top-0 z-10 bg-white dark:bg-[#1A1A1B] border-b border-gray-200 dark:border-white/5 shadow-sm">
+                        <div className="flex items-center justify-between h-14 px-4">
+                            <button onClick={() => setSidebarOpen(true)} className="p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5">
+                                <Menu className="w-5 h-5" />
+                            </button>
+                            <Link to="/" className="flex items-baseline gap-1">
+                                <span className="font-bold text-base tracking-[0.15em] text-indigo-700 dark:text-indigo-400" style={{ fontFamily: '"Montserrat", sans-serif' }}>VALEX</span>
+                                <span className="text-[10px] tracking-widest text-gray-400 dark:text-gray-500">ADMIN</span>
+                            </Link>
+                            <button
+                                onClick={toggle}
+                                className="p-1.5 rounded-lg text-gray-400 hover:text-amber-500 dark:text-gray-500 dark:hover:text-amber-400"
+                                title={dark ? 'Modo claro' : 'Modo oscuro'}
+                            >
+                                {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                            </button>
+                        </div>
+                    </header>
+
+                    <main className="flex-1 overflow-y-auto scrollbar-admin p-4 sm:p-6 lg:p-8">
+                        <div className="max-w-7xl mx-auto">
+                            <Outlet />
+                        </div>
+                    </main>
+                </div>
+            </div>
+    );
+}
 
 export default function AdminDashboard() {
-  const { userData, logout } = useAuth();
-  const location = useLocation();
-
-  const navItems = [
-    { name: 'Tablero Principal', path: '/admin', exact: true, icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
-    { name: 'Catálogo de Productos', path: '/admin/inventory', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' },
-  ];
-
-  return (
-    <div className="min-h-screen bg-valex-negro flex">
-      {/* Sidebar - Oculto en móviles temporalmente (Requiere botón hamburguesa para admin luego) */}
-      <aside className="w-64 bg-[#1e1e1f] border-r border-valex-gris/10 flex-col hidden lg:flex">
-        <div className="h-20 flex items-center justify-center border-b border-valex-gris/10 relative">
-          <a href="/" className="flex items-baseline hover:text-valex-hueso transition-colors">
-            <Logo className="text-xl text-valex-bronce" />
-            <span className="text-xs font-sans tracking-widest text-valex-bronce ml-2 mt-1">ADMIN</span>
-          </a>
-        </div>
-        
-        <nav className="flex-1 px-4 py-8 space-y-2">
-          <div className="text-xs uppercase tracking-widest text-valex-gris mb-4 px-2">Gestión de Tienda</div>
-          {navItems.map((item) => {
-            const isActive = item.exact ? location.pathname === item.path : location.pathname.startsWith(item.path);
-            return (
-              <NavLink
-                key={item.name}
-                to={item.path}
-                end={item.exact}
-                className={({ isActive: isActiveRouter }) => 
-                  `px-4 py-3 rounded-lg font-sans font-medium text-sm flex items-center gap-3 transition-colors ${
-                    isActiveRouter || isActive
-                      ? 'bg-valex-bronce/10 text-valex-bronce border border-valex-bronce/20'
-                      : 'text-valex-gris hover:bg-white/5 hover:text-valex-hueso'
-                  }`
-                }
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
-                </svg>
-                {item.name}
-              </NavLink>
-            );
-          })}
-        </nav>
-
-        <div className="p-4 border-t border-valex-gris/10">
-          <div className="flex items-center gap-3 px-2 mb-4">
-            {userData?.photoURL ? (
-              <img src={userData.photoURL} alt="Admin" className="w-8 h-8 rounded-full border border-valex-bronce/30 shadow-[0_0_10px_rgba(166,137,102,0.3)]" />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-valex-bronce/20 flex items-center justify-center text-valex-bronce text-xs border border-valex-bronce/50">
-                {userData?.nombre?.charAt(0) || 'A'}
-              </div>
-            )}
-            <div className="overflow-hidden">
-              <p className="text-valex-hueso text-sm font-medium truncate">{userData?.nombre || 'Administrador'}</p>
-              <p className="text-valex-bronce text-xs uppercase tracking-wider">{userData?.role}</p>
-            </div>
-          </div>
-          <button 
-            onClick={logout}
-            className="w-full text-left px-4 py-2 text-sm text-valex-gris hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors flex items-center gap-2 group"
-          >
-             <span className="group-hover:-translate-x-1 transition-transform">←</span> Cerrar sesión
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Framework Content */}
-      <main className="flex-1 p-4 sm:p-8 lg:p-12 overflow-y-auto relative h-screen">
-         <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="w-full h-full"
-         >
-            {/* Si estamos directamente en /admin, poner el Skeleton, sino, cargar Outlet (inventario o forms) */}
-            {location.pathname === '/admin' ? (
-              <>
-                <header className="mb-10">
-                  <h1 className="font-serif text-3xl sm:text-4xl text-valex-hueso font-bold">Resumen General</h1>
-                  <p className="text-valex-gris mt-2 font-sans font-light">Bienvenido al panel central de gestión.</p>
-                </header>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1, 2].map((_, i) => (
-                    <div key={i} className="bg-[#1e1e1f] border border-valex-gris/10 rounded-xl p-6 h-32 flex flex-col justify-center shadow-lg relative overflow-hidden">
-                      <div className="absolute top-0 right-0 p-4 opacity-5">
-                          <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2z"/></svg>
-                      </div>
-                      <div className="text-valex-gris/60 text-xs font-sans tracking-widest uppercase mb-2">Módulo en construcción</div>
-                      <div className="w-12 h-1 bg-valex-bronce/30 rounded-full animate-pulse"></div>
-                    </div>
-                  ))}
-                  <div className="bg-gradient-to-br from-valex-bronce/20 to-valex-negro border border-valex-bronce/30 rounded-xl p-6 h-32 flex flex-col justify-center shadow-[0_0_20px_rgba(166,137,102,0.1)] relative overflow-hidden">
-                      <div className="text-valex-hueso font-serif text-xl mb-1">¡Todo Listo!</div>
-                      <div className="text-valex-gris text-sm font-sans">El inventario está conectado.</div>
-                      <div className="absolute -bottom-6 -right-6 text-valex-bronce/20">
-                         <svg className="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                      </div>
-                  </div>
-                </div>
-              </>
-            ) : (
-                <Outlet />
-            )}
-         </motion.div>
-      </main>
-    </div>
-  );
+    return (
+        <AdminThemeProvider>
+            <AdminLayout />
+        </AdminThemeProvider>
+    );
 }

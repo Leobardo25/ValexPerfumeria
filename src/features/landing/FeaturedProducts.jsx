@@ -4,8 +4,10 @@ import { Link } from 'react-router-dom'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import { getProducts } from '../../services/productService'
 import { fadeInUp, VALEX_TRANSITION } from '../../constants/motion'
+import { useSiteConfig } from '../../context/SiteConfigContext'
 
 export default function FeaturedProducts() {
+    const { collectionTitle, collectionText } = useSiteConfig()
     const [featuredProducts, setFeaturedProducts] = useState([])
     const [loading, setLoading] = useState(true)
     
@@ -75,11 +77,17 @@ export default function FeaturedProducts() {
                         Colección Selecta
                     </span>
                     <h2 className="font-serif font-bold text-4xl sm:text-5xl lg:text-6xl text-valex-negro leading-[1.05] tracking-tight">
-                        Nuestras <br className="hidden lg:block"/>
-                        <span className="text-valex-bronce italic font-medium">Botellas</span>
+                        {(() => {
+                            const title = collectionTitle || 'Nuestras Botellas'
+                            const words = title.trim().split(' ')
+                            const accent = words.pop()
+                            return (
+                                <>{words.join(' ')}{words.length > 0 ? ' ' : ''}<br className="hidden lg:block" /><span className="text-valex-bronce italic font-medium">{accent}</span></>
+                            )
+                        })()}
                     </h2>
                     <p className="hidden lg:block text-valex-negro/50 mt-6 text-sm sm:text-base font-light mx-auto lg:mx-0 max-w-sm leading-relaxed">
-                        Explora las fragancias más exclusivas de nuestra bóveda, elaboradas meticulosamente para revelar tu identidad.
+                        {collectionText || 'Explora las fragancias más exclusivas de nuestra bóveda, elaboradas meticulosamente para revelar tu identidad.'}
                     </p>
                     
                     {/* Botones de Navegación Exclusivos para Desktop */}

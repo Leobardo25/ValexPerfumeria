@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import {
   onAuthStateChanged,
   signOut,
@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // Logout function
-  const logout = () => signOut(auth);
+  const logout = useCallback(() => signOut(auth), []);
 
   // Fetch role and personal data from Firestore
   const fetchAndSetUserData = useCallback(async (userAuth) => {
@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Google Sign In & Auto-register
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = useCallback(async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }) => {
       console.error("AuthContext: Error during popup signIn:", error);
       throw error; 
     }
-  };
+  }, []);
 
   // Listen to auth state changes actively
   useEffect(() => {
@@ -95,14 +95,14 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, [fetchAndSetUserData]);
 
-  const value = {
+  const value = useMemo(() => ({
     currentUser,
     userData,
     loading,
     logout,
     signInWithGoogle,
     setUserData
-  };
+  }), [currentUser, userData, loading, logout, signInWithGoogle]);
 
   return (
     <AuthContext.Provider value={value}>

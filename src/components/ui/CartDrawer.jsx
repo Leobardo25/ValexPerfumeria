@@ -1,9 +1,20 @@
-import { Drawer, Button, List, Typography, Badge, Empty, ConfigProvider, theme as antTheme } from 'antd';
-import { DeleteOutlined, MinusOutlined, PlusOutlined, ShoppingCartOutlined, CreditCardOutlined } from '@ant-design/icons';
-import { useCart } from '../../context/CartContext';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Drawer, ConfigProvider, theme as antTheme } from 'antd';
+import { CreditCardOutlined } from '@ant-design/icons';
+import { Trash2, Minus, Plus, ShoppingBag, ChevronLeft } from 'lucide-react';
+import { useCart } from '../../context/CartContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import CheckoutForm from './CheckoutForm';
 
-const { Text, Title } = Typography;
+const formatPrice = (price, isCRC) => {
+    return new Intl.NumberFormat(isCRC ? 'es-CR' : 'en-US', {
+        style: 'currency',
+        currency: isCRC ? 'CRC' : 'USD',
+        minimumFractionDigits: isCRC ? 0 : 2,
+        maximumFractionDigits: isCRC ? 0 : 2
+    }).format(Number(price) || 0);
+};
 
 export default function CartDrawer() {
     const { 
@@ -14,15 +25,21 @@ export default function CartDrawer() {
         updateQuantity, 
         getCartTotal 
     } = useCart();
-    
+
     const navigate = useNavigate();
-
+    const [showCheckout, setShowCheckout] = useState(false);
     const total = getCartTotal();
+    const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    const isCRC = cartItems.some(item => item.currency === 'CRC');
 
-    const handleCheckout = () => {
-        setIsCartDrawerOpen(false);
-        // Implementar lógica de checkout después
-        // navigate('/checkout'); 
+    // Resetear checkout al cerrar
+    useEffect(() => {
+        if (!isCartDrawerOpen) setShowCheckout(false);
+    }, [isCartDrawerOpen]);
+
+    const getItemImage = (item) => {
+        if (item.galleryImages?.length > 0) return item.galleryImages[0];
+        return item.coverImage || item.imageUrl || '';
     };
 
     return (
@@ -34,115 +51,158 @@ export default function CartDrawer() {
                     colorBgBase: '#151515',        
                     colorBgElevated: '#1a1a1b',
                     colorTextBase: '#F5F5F5',      
-                    colorTextSecondary: '#D1D1D1', 
                     fontFamily: '"Poppins", sans-serif',
                 }
             }}
         >
             <Drawer
-                title={
-                    <span className="font-serif text-valex-bronce text-xl tracking-widest flex items-center gap-3">
-                        <ShoppingCartOutlined /> MI BOLSA ({cartItems.length})
-                    </span>
-                }
+                title={null}
+                closable={false}
                 placement="right"
                 onClose={() => setIsCartDrawerOpen(false)}
                 open={isCartDrawerOpen}
-                width={400}
+                style={{ width: window.innerWidth <= 1024 ? '100vw' : 420 }}
                 styles={{ 
-                    header: { borderBottom: '1px solid rgba(166,137,102,0.2)', backgroundColor: '#151515' }, 
-                    body: { padding: '0', backgroundColor: '#1a1a1b', display: 'flex', flexDirection: 'column' } 
+                    header: { display: 'none' }, 
+                    body: { padding: '0', backgroundColor: '#111112', display: 'flex', flexDirection: 'column', height: '100%' },
                 }}
             >
+                {/* Header personalizado */}
+                <div className="flex items-center justify-between px-5 py-4 border-b border-valex-bronce/15 bg-[#111112] flex-shrink-0">
+                    <button
+                        onClick={() => showCheckout ? setShowCheckout(false) : setIsCartDrawerOpen(false)}
+                        className="flex items-center gap-1.5 text-valex-gris hover:text-valex-hueso transition-colors p-1.5 -ml-1.5 rounded-lg hover:bg-white/5 group"
+                    >
+                        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                        <span className="text-xs font-sans uppercase tracking-wider">
+                            {showCheckout ? 'Volver a la Bolsa' : 'Volver'}
+                        </span>
+                    </button>
+
+                    <AnimatePresence mode="wait">
+                        {!showCheckout && (
+                            <motion.div
+                                key="bag-title"
+                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                className="flex items-center gap-2"
+                            >
+                                <ShoppingBag className="w-4 h-4 text-valex-bronce" />
+                                <span className="font-serif text-valex-hueso text-base tracking-wider">MI BOLSA</span>
+                                <span className="bg-valex-bronce/15 text-valex-bronce text-[10px] font-sans font-bold px-2 py-0.5 rounded-full">{totalItems}</span>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    <div className="w-16" />
+                </div>
+
                 {cartItems.length === 0 ? (
                     <div className="flex-1 flex items-center justify-center p-8">
-                        <Empty 
-                            image={Empty.PRESENTED_IMAGE_SIMPLE}
-                            description={<span className="text-valex-gris font-serif">Tu bolsa está vacía.</span>}
-                        >
-                            <Button 
-                                type="primary" 
-                                className="!bg-valex-bronce border-none !text-valex-negro tracking-wide mt-4"
+                        <div className="text-center">
+                            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-valex-bronce/5 flex items-center justify-center">
+                                <ShoppingBag className="w-8 h-8 text-valex-bronce/40" />
+                            </div>
+                            <p className="text-valex-gris font-serif text-lg mb-2">Tu bolsa está vacía</p>
+                            <p className="text-valex-gris/50 font-sans text-sm mb-6">Explora nuestras fragancias exclusivas</p>
+                            <button 
                                 onClick={() => { setIsCartDrawerOpen(false); navigate('/tienda'); }}
+                                className="bg-valex-bronce text-valex-negro font-sans font-semibold text-sm px-8 py-3 rounded-lg hover:bg-valex-bronce/90 transition-all duration-300"
                             >
                                 Descubrir Fragancias
-                            </Button>
-                        </Empty>
+                            </button>
+                        </div>
                     </div>
                 ) : (
-                    <>
-                        <div className="flex-1 overflow-y-auto w-full">
-                            <List
-                                itemLayout="horizontal"
-                                dataSource={cartItems}
-                                renderItem={(item) => (
-                                    <List.Item 
-                                        className="!border-b !border-valex-gris/10 p-4 transition-colors hover:bg-valex-gris/5"
-                                        extra={
-                                            <Button 
-                                                type="text" 
-                                                danger 
-                                                icon={<DeleteOutlined />} 
-                                                onClick={() => removeFromCart(item.id)}
-                                            />
-                                        }
-                                    >
-                                        <List.Item.Meta
-                                            avatar={
-                                                <div 
-                                                    className="w-16 h-16 bg-[#151515] bg-center bg-contain bg-no-repeat border border-valex-gris/20 rounded"
-                                                    style={{ backgroundImage: `url(${item.imageUrl})` }}
-                                                />
-                                            }
-                                            title={
-                                                <span className="font-serif text-valex-hueso text-base">{item.name}</span>
-                                            }
-                                            description={
-                                                <div className="flex flex-col gap-2 mt-1">
-                                                    <Text className="text-valex-bronce font-medium">${Number(item.price).toFixed(2)}</Text>
-                                                    <div className="flex items-center gap-3">
-                                                        <Button 
-                                                            size="small" 
-                                                            icon={<MinusOutlined className="text-xs" />} 
-                                                            onClick={() => updateQuantity(item.id, -1)}
-                                                            className="bg-transparent border-valex-gris/30 text-valex-gris"
-                                                        />
-                                                        <Text className="text-valex-hueso">{item.quantity}</Text>
-                                                        <Button 
-                                                            size="small" 
-                                                            icon={<PlusOutlined className="text-xs" />} 
-                                                            onClick={() => updateQuantity(item.id, 1)}
-                                                            className="bg-transparent border-valex-gris/30 text-valex-gris"
-                                                        />
+                    <div className="flex-1 overflow-hidden relative">
+                        <AnimatePresence mode="wait">
+                            {!showCheckout ? (
+                                <motion.div
+                                    key="cart-items"
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    transition={{ duration: 0.25 }}
+                                    className="absolute inset-0 flex flex-col"
+                                >
+                                    {/* Lista de items */}
+                                    <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+                                        <AnimatePresence>
+                                            {cartItems.map((item) => (
+                                                <motion.div
+                                                    key={item.id}
+                                                    layout
+                                                    initial={{ opacity: 0, x: 30 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    exit={{ opacity: 0, x: -30, height: 0, marginBottom: 0 }}
+                                                    transition={{ duration: 0.25 }}
+                                                    className="bg-[#1a1a1b] rounded-xl border border-valex-gris/8 p-3 flex gap-3 group hover:border-valex-bronce/20 transition-colors duration-300"
+                                                >
+                                                    <div 
+                                                        className="w-[72px] h-[72px] flex-shrink-0 bg-[#111] rounded-lg bg-center bg-cover bg-no-repeat border border-valex-gris/10"
+                                                        style={{ backgroundImage: `url(${getItemImage(item)})` }}
+                                                    />
+                                                    <div className="flex-1 min-w-0 flex flex-col justify-between">
+                                                        <div>
+                                                            <h4 className="font-sans font-semibold text-valex-hueso text-sm leading-tight truncate">{item.name}</h4>
+                                                            <p className="text-[11px] text-valex-gris/50 font-sans mt-0.5">{item.ml ? `${item.ml} ml` : item.category}</p>
+                                                        </div>
+                                                        <div className="flex items-center justify-between mt-1">
+                                                            <div className="flex items-center gap-0 bg-[#111] rounded-lg border border-valex-gris/10">
+                                                                <button onClick={() => updateQuantity(item.id, -1)} className="w-7 h-7 flex items-center justify-center text-valex-gris hover:text-valex-bronce transition-colors">
+                                                                    <Minus className="w-3 h-3" />
+                                                                </button>
+                                                                <span className="text-valex-hueso text-xs font-sans font-medium w-6 text-center">{item.quantity}</span>
+                                                                <button onClick={() => updateQuantity(item.id, 1)} className="w-7 h-7 flex items-center justify-center text-valex-gris hover:text-valex-bronce transition-colors">
+                                                                    <Plus className="w-3 h-3" />
+                                                                </button>
+                                                            </div>
+                                                            <span className="font-sans font-semibold text-valex-bronce text-sm">
+                                                                {formatPrice(item.price * item.quantity, item.currency === 'CRC')}
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            }
-                                        />
-                                    </List.Item>
-                                )}
-                            />
-                        </div>
-
-                        {/* Order Summary Footer */}
-                        <div className="border-t border-valex-bronce/20 p-6 bg-[#151515]">
-                            <div className="flex justify-between items-center mb-6">
-                                <Text className="font-serif text-valex-gris uppercase tracking-widest">Total Estimado</Text>
-                                <Title level={3} className="!text-valex-bronce !mb-0 !font-sans font-medium">
-                                    ${total.toFixed(2)}
-                                </Title>
-                            </div>
-                            <Button 
-                                type="primary" 
-                                block 
-                                size="large"
-                                icon={<CreditCardOutlined />}
-                                onClick={handleCheckout}
-                                className="!h-14 !text-base font-serif tracking-widest uppercase !bg-valex-bronce hover:!bg-valex-bronce-light border-none shadow-[0_0_15px_rgba(166,137,102,0.3)]"
-                            >
-                                Proceder al Pago
-                            </Button>
-                        </div>
-                    </>
+                                                    <button onClick={() => removeFromCart(item.id)} className="self-start p-1.5 text-valex-gris/30 hover:text-red-400 transition-colors rounded-lg hover:bg-red-400/5">
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    </button>
+                                                </motion.div>
+                                            ))}
+                                        </AnimatePresence>
+                                    </div>
+                                    {/* Footer */}
+                                    <div className="border-t border-valex-bronce/15 px-6 py-5 bg-[#111112] flex-shrink-0">
+                                        <div className="flex justify-between items-center mb-5">
+                                            <span className="font-sans text-valex-gris/70 text-xs uppercase tracking-[0.2em]">Total Estimado</span>
+                                            <span className="font-serif font-bold text-2xl text-valex-bronce">{formatPrice(total, isCRC)}</span>
+                                        </div>
+                                        <button
+                                            onClick={() => setShowCheckout(true)}
+                                            className="w-full py-3.5 bg-valex-bronce text-valex-negro font-sans font-bold text-sm tracking-[0.15em] uppercase rounded-xl hover:bg-valex-bronce/90 transition-all duration-300 shadow-[0_4px_20px_rgba(166,137,102,0.25)] flex items-center justify-center gap-2"
+                                        >
+                                            <CreditCardOutlined className="text-base" />
+                                            Proceder al Pago
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key="checkout-form"
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    transition={{ duration: 0.25 }}
+                                    className="absolute inset-0 p-5 bg-[#111112]"
+                                >
+                                    <CheckoutForm
+                                        items={cartItems}
+                                        total={total}
+                                        preserveCart={false}
+                                        onSuccess={() => setIsCartDrawerOpen(false)}
+                                        showMobileSummary={true}
+                                    />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 )}
             </Drawer>
         </ConfigProvider>

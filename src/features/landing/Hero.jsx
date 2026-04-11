@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { FaInstagram, FaTiktok, FaFacebookF, FaWhatsapp } from 'react-icons/fa'
 import { HERO_CONTENT } from '../../constants'
+import { useSiteConfig } from '../../context/SiteConfigContext'
 import { heroReveal, fadeInUp, VALEX_TRANSITION, VALEX_SLOW } from '../../constants/motion'
 
 export default function Hero() {
@@ -70,6 +71,7 @@ export default function Hero() {
 /* Sub-components to keep Hero clean */
 
 function HeroBadge() {
+    const { heroBadge } = useSiteConfig()
     return (
         <motion.span 
             variants={heroReveal} 
@@ -79,12 +81,17 @@ function HeroBadge() {
             transition={VALEX_SLOW} 
             className="inline-block text-valex-bronce font-sans font-medium text-xs tracking-[0.25em] uppercase border border-valex-bronce/30 px-4 py-1.5 rounded-full"
         >
-            Perfumería de Autor
+            {heroBadge || 'Perfumería de Autor'}
         </motion.span>
     )
 }
 
 function HeroTitle() {
+    const { heroTitle } = useSiteConfig()
+    const title = heroTitle || HERO_CONTENT.title
+    const words = title.split(' ')
+    const main = words.slice(0, 4).join(' ')
+    const accent = words.slice(4).join(' ')
     return (
         <motion.div 
             variants={heroReveal} 
@@ -95,16 +102,15 @@ function HeroTitle() {
             className="flex items-center pt-6 justify-center"
         >
             <h1 className="font-serif font-bold text-5xl md:text-6xl lg:text-7xl text-valex-hueso leading-[1.1] tracking-tight">
-                {HERO_CONTENT.title.split(' ').slice(0, 4).join(' ')}{' '}
-                <span className="text-valex-bronce italic">
-                    {HERO_CONTENT.title.split(' ').slice(4).join(' ')}
-                </span>
+                {main}{accent ? ' ' : ''}
+                {accent && <span className="text-valex-bronce italic">{accent}</span>}
             </h1>
         </motion.div>
     )
 }
 
 function HeroSubtitle() {
+    const { heroSubtitle } = useSiteConfig()
     return (
         <motion.p 
             variants={heroReveal} 
@@ -114,12 +120,13 @@ function HeroSubtitle() {
             transition={VALEX_SLOW} 
             className="text-valex-hueso/80 text-lg sm:text-xl leading-relaxed max-w-2xl font-light text-center"
         >
-            {HERO_CONTENT.subtitle}
+            {heroSubtitle || HERO_CONTENT.subtitle}
         </motion.p>
     )
 }
 
 function HeroCTA() {
+    const { whatsapp } = useSiteConfig()
     return (
         <motion.div 
             variants={heroReveal} 
@@ -132,7 +139,7 @@ function HeroCTA() {
             <Link to="/tienda" className="inline-flex items-center justify-center gap-2 font-sans font-semibold text-sm px-10 py-4 rounded-lg bg-valex-bronce text-valex-negro hover:bg-valex-bronce-dark shadow-lg hover:shadow-valex-bronce/30 transition-all duration-300 tracking-wide">
                 Ver Catálogo
             </Link>
-            <a href="https://wa.me/xxxxxxxxxx" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 font-sans font-medium text-sm px-10 py-4 rounded-lg border border-valex-gris/20 text-valex-gris hover:text-valex-hueso hover:border-valex-gris/40 transition-all duration-300 tracking-wide">
+            <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 font-sans font-medium text-sm px-10 py-4 rounded-lg border border-valex-gris/20 text-valex-gris hover:text-valex-hueso hover:border-valex-gris/40 transition-all duration-300 tracking-wide">
                 <FaWhatsapp className="w-5 h-5" />
                 Contactar por WhatsApp
             </a>
@@ -141,10 +148,11 @@ function HeroCTA() {
 }
 
 function HeroSocials({ vertical }) {
+    const { instagram, tiktok, facebook } = useSiteConfig()
     const socials = [
-        { icon: FaInstagram, href: '#' },
-        { icon: FaTiktok, href: '#' },
-        { icon: FaFacebookF, href: '#' },
+        { icon: FaInstagram, href: instagram || '#' },
+        { icon: FaTiktok, href: tiktok || '#' },
+        { icon: FaFacebookF, href: facebook || '#' },
     ]
     return (
         <motion.div 

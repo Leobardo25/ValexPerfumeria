@@ -1,0 +1,97 @@
+import { motion } from 'framer-motion';
+import { X, Store } from 'lucide-react';
+import { FaInstagram, FaFacebook, FaWhatsapp, FaTiktok } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { NAV_LINKS } from '../../../constants';
+import { useSiteConfig } from '../../../context/SiteConfigContext';
+import Logo from '../../ui/Logo';
+
+function SocialIcons() {
+    const { instagram, facebook, tiktok, whatsapp } = useSiteConfig();
+    return (
+        <>
+            <a href={instagram || '#'} target="_blank" rel="noopener noreferrer" className="text-valex-gris/50 hover:text-valex-bronce transition-colors duration-200">
+                <FaInstagram size={26} />
+            </a>
+            <a href={facebook || '#'} target="_blank" rel="noopener noreferrer" className="text-valex-gris/50 hover:text-valex-bronce transition-colors duration-200">
+                <FaFacebook size={26} />
+            </a>
+            <a href={tiktok || '#'} target="_blank" rel="noopener noreferrer" className="text-valex-gris/50 hover:text-valex-bronce transition-colors duration-200">
+                <FaTiktok size={26} />
+            </a>
+            <a href={`https://wa.me/${whatsapp || '50688888888'}`} target="_blank" rel="noopener noreferrer" className="text-valex-gris/50 hover:text-valex-bronce transition-colors duration-200">
+                <FaWhatsapp size={26} />
+            </a>
+        </>
+    );
+}
+
+export default function NavbarMobileMenu({ menuOpen, setMenuOpen, scrollToTop, getLinkHref, handleNavClick }) {
+    if (!menuOpen) return null;
+    
+    return (
+        <motion.div
+            className="md:hidden fixed inset-0 z-[100] bg-[#111112]"
+            initial={{ opacity: 0, x: '-100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '-100%' }}
+            transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
+        >
+            <div className="h-full flex flex-col px-5">
+                <div className="flex items-center justify-between pt-5 pb-8 border-b border-valex-gris/10">
+                    <button
+                        onClick={() => setMenuOpen(false)}
+                        className="text-valex-gris hover:text-valex-hueso p-2 rounded-lg transition-colors"
+                        aria-label="Cerrar menú"
+                    >
+                        <X className="w-6 h-6" />
+                    </button>
+                    <Link to="/" onClick={() => { setMenuOpen(false); scrollToTop(); }}>
+                        <Logo className="text-xl" />
+                    </Link>
+                </div>
+
+                <nav className="flex flex-col gap-1 mt-6">
+                    {NAV_LINKS.map((link, i) => (
+                        <motion.a
+                            key={link.href}
+                            href={getLinkHref(link.href)}
+                            onClick={(e) => handleNavClick(e, link)}
+                            className="text-valex-gris/70 hover:text-valex-hueso font-sans font-light text-2xl tracking-[0.12em] py-4 border-b border-valex-gris/8 transition-colors duration-200"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.28, delay: 0.1 + i * 0.07 }}
+                        >
+                            {link.label}
+                        </motion.a>
+                    ))}
+                </nav>
+
+                <motion.div
+                    className="mt-14"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.35 }}
+                >
+                    <Link
+                        to="/tienda"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center justify-center gap-3 w-full bg-valex-bronce text-valex-negro py-4 rounded-xl font-sans font-bold text-base tracking-[0.18em] uppercase shadow-[0_4px_24px_rgba(166,137,102,0.35)] hover:bg-valex-bronce/90 transition-all duration-300"
+                    >
+                        <Store className="w-5 h-5" />
+                        Tienda
+                    </Link>
+                </motion.div>
+
+                <motion.div
+                    className="mt-12 flex items-center justify-center gap-8"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3, delay: 0.45 }}
+                >
+                    <SocialIcons />
+                </motion.div>
+            </div>
+        </motion.div>
+    );
+}

@@ -126,6 +126,19 @@ export const updateProduct = async (id, productData, newCoverFile, currentCoverU
 };
 
 /**
+ * Actualiza un campo específico de un producto (para ediciones rápidas inline)
+ */
+export const updateProductField = async (id, field, value) => {
+    try {
+        const docRef = doc(db, COLLECTION_NAME, id);
+        await updateDoc(docRef, { [field]: value, updatedAt: serverTimestamp() });
+    } catch (error) {
+        console.error(`Error actualizando ${field} del producto ${id}:`, error);
+        throw error;
+    }
+};
+
+/**
  * Elimina un producto de Firestore.
  */
 export const deleteProduct = async (id) => {

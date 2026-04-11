@@ -1,4 +1,5 @@
-import { MapPin, Clock, Mail, Instagram } from 'lucide-react'
+import { Instagram, Mail } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { BRAND, NAV_LINKS } from '../../constants'
 
 export default function Footer() {
@@ -53,26 +54,24 @@ export default function Footer() {
                         </div>
                     </div>
 
-                    {/* Contact column */}
+                    {/* Policies column */}
                     <div className="space-y-5">
                         <h3 className="font-serif font-semibold text-lg text-valex-hueso">
-                            Contacto
+                            Políticas de Tienda
                         </h3>
-                        <div className="space-y-4">
-                            <div className="flex items-start gap-3">
-                                <Clock className="w-4 h-4 text-valex-bronce mt-1 flex-shrink-0" />
-                                <div className="text-sm text-valex-gris/70">
-                                    <p>Lun – Vie: 10:00 – 19:00</p>
-                                    <p>Sáb: 10:00 – 15:00</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-3">
-                                <MapPin className="w-4 h-4 text-valex-bronce mt-1 flex-shrink-0" />
-                                <p className="text-sm text-valex-gris/70">
-                                    Av. Principal #123<br />
-                                    Centro, Ciudad
-                                </p>
-                            </div>
+                        <div className="flex flex-col gap-3">
+                            <Link to="/politica/refunds" className="text-valex-gris/70 hover:text-valex-bronce text-sm transition-colors duration-300">
+                                Política de Reembolsos
+                            </Link>
+                            <Link to="/politica/shipping" className="text-valex-gris/70 hover:text-valex-bronce text-sm transition-colors duration-300">
+                                Política de Envíos
+                            </Link>
+                            <Link to="/politica/privacy" className="text-valex-gris/70 hover:text-valex-bronce text-sm transition-colors duration-300">
+                                Política de Privacidad
+                            </Link>
+                            <Link to="/politica/terms" className="text-valex-gris/70 hover:text-valex-bronce text-sm transition-colors duration-300">
+                                Términos de Servicio
+                            </Link>
                         </div>
                     </div>
                 </div>

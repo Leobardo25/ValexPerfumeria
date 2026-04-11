@@ -50,6 +50,25 @@ body {
   scrollbar-color: var(--bronce) var(--negro-mate);
 }
 
+/* ── Admin panel scrollbar (light theme override) ── */
+.scrollbar-admin::-webkit-scrollbar {
+  width: 5px;
+}
+.scrollbar-admin::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+.scrollbar-admin::-webkit-scrollbar-thumb {
+  background: #c7d2fe;
+  border-radius: 10px;
+}
+.scrollbar-admin::-webkit-scrollbar-thumb:hover {
+  background: #818cf8;
+}
+.scrollbar-admin {
+  scrollbar-width: thin;
+  scrollbar-color: #c7d2fe #f1f5f9;
+}
+
 /* ── Animated gradient text for VALEX logo ── */
 @keyframes bronceShimmer {
   0% {
@@ -200,4 +219,28 @@ body {
   background: transparent;
   border: none;
   height: 4px;
+}
+
+/* ── Ant Design Drawer — animación de cierre suave ── */
+
+/* Fade + slide al abrir */
+.ant-drawer-content-wrapper {
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Mask fade suave */
+.ant-drawer-mask {
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Estado de cierre: combina slide + fade para evitar el parpadeo en esquina */
+.ant-drawer-content-wrapper-hidden {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+/* Asegura que el wrapper no se vea a medias durante la transición */
+.ant-drawer-right .ant-drawer-content-wrapper {
+  will-change: transform, opacity;
 }

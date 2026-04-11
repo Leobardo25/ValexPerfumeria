@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Usuarios: cada quien solo puede ver y editar su propio perfil
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Productos: lectura pública, escritura abierta (ajustar cuando haya roles)
+    match /products/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Pedidos: cualquiera puede crear (checkout), solo admins pueden leer/actualizar
+    match /orders/{orderId} {
+      allow create: if true;
+      allow read, update: if request.auth != null;
+    }
+
+    // Config del sitio: lectura pública, escritura solo para autenticados
+    match /site_config/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Contadores: necesarios para el número de orden secuencial
+    match /counters/{docId} {
+      allow read, write: if true;
+    }
+
+    // Clientes CRM: solo admins (usuarios autenticados)
+    match /customers/{customerId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
