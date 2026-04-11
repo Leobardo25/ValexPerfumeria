@@ -30,10 +30,11 @@ export default function CheckoutDrawer() {
                 placement="right"
                 onClose={closeCheckoutDrawer}
                 open={isOpen}
-                style={{ width: window.innerWidth <= 1024 ? '100vw' : '700px' }}
+                width={window.innerWidth <= 1024 ? '100%' : '700px'}
+                zIndex={2000}
                 styles={{
                     header: { display: 'none' },
-                    body: { padding: '0', backgroundColor: '#111112', display: 'flex', flexDirection: 'column', height: '100%' },
+                    body: { padding: '0', backgroundColor: '#111112', display: 'flex', flexDirection: 'column', height: '100dvh' },
                 }}
                 className="checkout-drawer"
             >

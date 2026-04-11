@@ -62,9 +62,10 @@ export default function CartDrawer() {
                 onClose={() => setIsCartDrawerOpen(false)}
                 open={isCartDrawerOpen}
                 width={window.innerWidth <= 1024 ? '100%' : 420}
+                zIndex={2000}
                 styles={{ 
                     header: { display: 'none' }, 
-                    body: { padding: '0', backgroundColor: '#111112', display: 'flex', flexDirection: 'column', height: '100%' },
+                    body: { padding: '0', backgroundColor: '#111112', display: 'flex', flexDirection: 'column', height: '100dvh' },
                 }}
             >
                 {/* Header personalizado */}
@@ -190,7 +191,7 @@ export default function CartDrawer() {
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: 20 }}
                                     transition={{ duration: 0.25 }}
-                                    className="absolute inset-0 p-5 bg-[#111112]"
+                                    className="flex-1 overflow-hidden p-5 bg-[#111112]"
                                 >
                                     <CheckoutForm
                                         items={cartItems}

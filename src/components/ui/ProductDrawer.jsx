@@ -174,9 +174,10 @@ export default function ProductDrawer() {
                 onClose={handleClose}
                 open={isOpen}
                 width="100%"
+                zIndex={2000}
                 styles={{
                     header: { display: 'none' },
-                    body: { padding: '0', backgroundColor: '#111112', display: 'flex', flexDirection: 'column', height: '100%' },
+                    body: { padding: '0', backgroundColor: '#111112', display: 'flex', flexDirection: 'column', height: '100dvh' },
                     wrapper: { width: '100%', maxWidth: '1000px' }
                 }}
                 className="product-drawer-wide"
@@ -489,7 +490,7 @@ export default function ProductDrawer() {
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: -20 }}
                                         transition={{ duration: 0.3 }}
-                                        className="lg:absolute lg:inset-0 lg:p-5 lg:p-6 bg-[#111112] lg:z-10"
+                                        className="flex-1 overflow-hidden p-5 sm:p-6 bg-[#111112]"
                                     >
                                         <CheckoutForm
                                             items={[{ ...selectedProduct, quantity: 1 }]}
