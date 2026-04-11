@@ -70,25 +70,87 @@ export function CartProvider({ children }) {
             return [...prevItems, { ...product, quantity }];
         });
 
-        // Trigger highly aesthetic Antd Notification
-        notification.success({
-            message: <span className="font-serif tracking-wide text-valex-bronce">Anexado a la Bolsa</span>,
-            description: <span className="text-valex-gris">{product.name} fue añadido a tu pedido.</span>,
+        const productImage = product.galleryImages?.[0] || product.coverImage || product.imageUrl;
+        
+        notification.open({
+            message: null,
+            description: (
+                <div className="flex items-center gap-4 -my-1">
+                    {productImage ? (
+                        <div className="w-12 h-12 rounded-lg border border-valex-bronce/20 overflow-hidden flex-shrink-0 shadow-lg">
+                            <img src={productImage} alt={product.name} className="w-full h-full object-cover" />
+                        </div>
+                    ) : (
+                        <div className="w-12 h-12 rounded-lg bg-[#111] border border-valex-bronce/20 flex items-center justify-center flex-shrink-0 text-valex-bronce">
+                            <ShoppingBag className="w-5 h-5" />
+                        </div>
+                    )}
+                    <div className="flex flex-col flex-1 justify-center">
+                        <span className="font-sans text-[9px] tracking-[0.2em] uppercase text-valex-bronce font-bold mb-1">
+                            Añadido a la Bolsa
+                        </span>
+                        <span className="font-serif text-[13px] font-semibold text-valex-hueso leading-tight line-clamp-1">
+                            {product.name}
+                        </span>
+                        <span className="font-sans text-[11px] text-valex-gris/60 mt-0.5 font-medium">
+                            {quantity} {quantity === 1 ? 'unidad' : 'unidades'} • {product.category}
+                        </span>
+                    </div>
+                </div>
+            ),
             placement: 'bottomRight',
-            icon: <ShoppingBag size={18} style={{ color: '#A68966' }} />,
-            style: { backgroundColor: '#1e1e1f', border: '1px solid rgba(166,137,102,0.3)', color: '#F5F5F5' },
-            closeIcon: <span className="text-valex-gris hover:text-white">×</span>
+            icon: null,
+            style: { 
+                backgroundColor: 'rgba(21, 21, 21, 0.95)', 
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: '1px solid #A68966', 
+                borderRadius: '16px',
+                padding: '16px',
+                width: '340px',
+                boxShadow: '0 10px 30px -10px rgba(166,137,102,0.3)'
+            },
+            closeIcon: <span className="text-valex-gris/40 hover:text-valex-hueso transition-colors mt-2 text-[16px]">✕</span>,
+            duration: 4,
         });
     }, []);
 
     const removeFromCart = useCallback((productId) => {
         setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
-        notification.info({
-            message: 'Eliminado',
-            description: 'Producto retirado de la bolsa.',
+        notification.open({
+            message: null,
+            description: (
+                <div className="flex items-center gap-4 -my-1">
+                    <div className="w-12 h-12 rounded-lg bg-[#151515] border border-valex-gris/15 flex items-center justify-center flex-shrink-0 text-valex-gris/60 shadow-lg">
+                        <DeleteOutlined className="text-[18px]" />
+                    </div>
+                    <div className="flex flex-col flex-1 justify-center">
+                        <span className="font-sans text-[9px] tracking-[0.2em] uppercase text-valex-gris font-bold mb-1">
+                            Retirado
+                        </span>
+                        <span className="font-serif text-[13px] font-semibold text-valex-hueso leading-tight">
+                            Producto Eliminado
+                        </span>
+                        <span className="font-sans text-[11px] text-valex-gris/60 mt-0.5 font-medium">
+                            Se ha quitado de la bolsa
+                        </span>
+                    </div>
+                </div>
+            ),
             placement: 'bottomRight',
-            icon: <DeleteOutlined style={{ color: '#d9363e' }} />,
-            style: { backgroundColor: '#1e1e1f', border: '1px solid #333', color: '#F5F5F5' }
+            icon: null,
+            style: { 
+                backgroundColor: 'rgba(21, 21, 21, 0.95)', 
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: '1px solid rgba(209,209,209,0.15)', 
+                borderRadius: '16px',
+                padding: '16px',
+                width: '340px',
+                boxShadow: '0 10px 30px -10px rgba(0,0,0,0.5)'
+            },
+            closeIcon: <span className="text-valex-gris/40 hover:text-valex-hueso transition-colors mt-2 text-[16px]">✕</span>,
+            duration: 3,
         });
     }, []);
 

@@ -199,9 +199,9 @@ export default function CustomersList() {
                                     const waPhone = c.phone ? String(c.phone).replace(/\D/g, '') : null;
                                     return (
                                         <tr key={c.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
-                                            <td className="px-5 py-4">
+                                            <td className="px-5 py-2.5">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center font-bold font-serif shadow-sm border border-indigo-100/50 dark:border-indigo-500/20">
+                                                    <div className="w-9 h-9 bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center font-bold font-serif shadow-sm border border-indigo-100/50 dark:border-indigo-500/20">
                                                         {c.name && c.name !== 'Desconocido' ? c.name.charAt(0).toUpperCase() : '?'}
                                                     </div>
                                                     <div className="flex flex-col">
@@ -210,17 +210,17 @@ export default function CustomersList() {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-5 py-4">
+                                            <td className="px-5 py-2.5">
                                                 <div className="flex items-center gap-2">
                                                     {waPhone ? (
                                                         <a
                                                             href={`https://wa.me/506${waPhone}?text=Hola ${c.name}, le contactamos de Valex Perfumería.`}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white px-3 py-1.5 rounded-lg transition-colors font-medium text-xs"
+                                                            className="flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white px-3 py-1.5 rounded-lg transition-colors font-medium text-[11px]"
                                                             title={`Contactar a ${c.phone}`}
                                                         >
-                                                            <IoLogoWhatsapp className="w-4 h-4" />
+                                                            <IoLogoWhatsapp className="w-3.5 h-3.5" />
                                                             Contactar
                                                         </a>
                                                     ) : (
@@ -228,23 +228,23 @@ export default function CustomersList() {
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-5 py-4 text-center">
+                                            <td className="px-5 py-2.5 text-center">
                                                 <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-white/5 text-xs font-bold text-gray-600 dark:text-gray-400">
                                                     {c.totalOrders || 0}
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-4">
+                                            <td className="px-5 py-2.5">
                                                 <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
                                                     {c.ltvRaw > 0 ? `₡${c.ltvRaw.toLocaleString('es-CR')}` : '—'}
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-4">
+                                            <td className="px-5 py-2.5">
                                                 <span className="text-xs font-medium text-gray-500 bg-gray-50 dark:bg-white/5 px-2 py-1 flex items-center gap-1.5 border border-gray-100 dark:border-transparent rounded-md w-fit">
                                                     <ShoppingBag className="w-3 h-3 text-gray-400" />
                                                     {c.lastPurchaseDate ? new Date(c.lastPurchaseDate).toLocaleDateString('es-CR', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-4 text-right">
+                                            <td className="px-5 py-2.5 text-right">
                                                 <div className="flex flex-col items-end gap-3">
                                                     <CustomerTagDropdown 
                                                         customer={c} 

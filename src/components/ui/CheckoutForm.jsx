@@ -278,7 +278,7 @@ export default function CheckoutForm({ items, total, preserveCart = true, onSucc
                     </div>
 
                     {/* Botón y nota dentro del scroll */}
-                    <div className="pt-4 flex flex-col gap-3 pb-2">
+                    <div className="pt-4 flex flex-col gap-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
                         <Button
                             onClick={handleSubmit}
                             loading={isSubmitting}

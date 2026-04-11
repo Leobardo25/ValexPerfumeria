@@ -418,15 +418,15 @@ const DesktopCard = ({ product, useBg, onAddToCart }) => {
                 <div className="flex items-center gap-3">
                     <button 
                         onClick={(e) => { e.stopPropagation(); openProductDrawer(product); }}
-                        className="text-[10px] font-sans uppercase tracking-[0.2em] text-valex-bronce hover:text-valex-hueso transition-all duration-300 border-b border-valex-bronce/30 hover:border-valex-hueso pb-0.5"
+                        className="bg-transparent border border-valex-bronce/60 text-valex-bronce hover:bg-valex-bronce hover:text-valex-negro rounded-full px-5 py-1.5 text-[9px] font-sans font-extrabold tracking-[0.2em] uppercase transition-all duration-300"
                     >VER</button>
                     <button
                         onClick={(e) => { e.stopPropagation(); onAddToCart(product); }}
                         disabled={isOutOfStock}
-                        className="text-valex-bronce hover:text-valex-hueso transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-valex-bronce/10 p-1.5 rounded-full"
+                        className="flex items-center justify-center bg-valex-bronce text-valex-negro h-8 w-8 rounded-full hover:bg-valex-hueso transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-valex-bronce/20"
                         title="Añadir a Bolsa"
                     >
-                        <ShoppingBag className="w-[18px] h-[18px]" />
+                        <ShoppingBag className="w-[16px] h-[16px]" />
                     </button>
                 </div>
             </div>
@@ -484,16 +484,16 @@ const MobileCard = ({ product, useBg, onAddToCart }) => {
                     <div className="flex items-center gap-2">
                         <button 
                             onClick={(e) => { e.stopPropagation(); openProductDrawer(product); }}
-                            className="text-xs font-serif uppercase tracking-[0.1em] text-valex-hueso/80 bg-valex-gris/5 px-3 py-1.5 rounded hover:bg-valex-hueso hover:text-valex-negro transition-all duration-300"
+                            className="bg-transparent border border-valex-bronce/60 text-valex-bronce hover:bg-valex-bronce hover:text-valex-negro rounded-full px-5 h-8 flex items-center justify-center text-[9px] font-sans font-extrabold tracking-[0.2em] uppercase transition-all duration-300"
                         >VER</button>
                         <button 
                             onClick={(e) => { e.stopPropagation(); onAddToCart(product); }}
                             disabled={isOutOfStock}
-                            className="flex items-center justify-center bg-valex-bronce text-valex-negro h-8 px-3 rounded hover:bg-valex-hueso transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex items-center justify-center bg-valex-bronce text-valex-negro h-8 px-5 rounded-full hover:bg-valex-hueso transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-valex-bronce/20"
                             title="Añadir a Bolsa"
                         >
-                            <ShoppingBag className="w-[18px] h-[18px] mr-1.5" />
-                            <span className="text-[10px] uppercase font-serif tracking-[0.1em] font-bold mt-[2px]">AÑADIR</span>
+                            <ShoppingBag className="w-[15px] h-[15px] mr-2" />
+                            <span className="text-[9px] uppercase font-sans tracking-[0.2em] font-extrabold mt-[1px]">AÑADIR</span>
                         </button>
                     </div>
                 </div>
@@ -541,7 +541,7 @@ const MobileCompactCard = ({ product, useBg }) => {
             </Typography.Title>
             <div className="flex items-center justify-between mt-1 border-t border-valex-gris/10 pt-2">
                 <span className="font-sans font-medium text-valex-bronce text-sm">{formatPrice(product.price, product.currency === 'CRC')}</span>
-                <span className="text-[9px] font-sans uppercase tracking-[0.15em] text-valex-bronce/70">VER</span>
+                <button className="text-[8px] font-sans font-extrabold uppercase tracking-[0.2em] text-valex-bronce border border-valex-bronce/50 rounded-full px-3 py-1 hover:bg-valex-bronce hover:text-valex-negro transition-colors mt-1">VER</button>
             </div>
         </Card>
     );

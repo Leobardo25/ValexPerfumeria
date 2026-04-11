@@ -61,7 +61,7 @@ export default function CartDrawer() {
                 placement="right"
                 onClose={() => setIsCartDrawerOpen(false)}
                 open={isCartDrawerOpen}
-                style={{ width: window.innerWidth <= 1024 ? '100vw' : 420 }}
+                width={window.innerWidth <= 1024 ? '100%' : 420}
                 styles={{ 
                     header: { display: 'none' }, 
                     body: { padding: '0', backgroundColor: '#111112', display: 'flex', flexDirection: 'column', height: '100%' },
@@ -169,7 +169,7 @@ export default function CartDrawer() {
                                         </AnimatePresence>
                                     </div>
                                     {/* Footer */}
-                                    <div className="border-t border-valex-bronce/15 px-6 py-5 bg-[#111112] flex-shrink-0">
+                                    <div className="border-t border-valex-bronce/15 px-6 py-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] bg-[#111112] flex-shrink-0">
                                         <div className="flex justify-between items-center mb-5">
                                             <span className="font-sans text-valex-gris/70 text-xs uppercase tracking-[0.2em]">Total Estimado</span>
                                             <span className="font-serif font-bold text-2xl text-valex-bronce">{formatPrice(total, isCRC)}</span>

@@ -12,10 +12,10 @@ const DOT = {
 };
 
 const BADGE = {
-    nuevo:        'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400',
-    'en proceso': 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400',
-    entregado:    'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400',
-    cancelado:    'bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400',
+    nuevo:        'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400',
+    'en proceso': 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400',
+    entregado:    'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400',
+    cancelado:    'bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400',
 };
 
 const label = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -51,13 +51,13 @@ export default function OrderStatusDropdown({ orderId, currentStatus, onUpdated 
             <button
                 onClick={(e) => { e.stopPropagation(); setOpen(o => !o); }}
                 disabled={loading}
-                className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-opacity hover:opacity-75 ${BADGE[currentStatus] ?? 'bg-gray-100 text-gray-600 dark:bg-white/5 dark:text-gray-400'}`}
+                className={`text-xs font-semibold px-3 py-1.5 rounded-full min-w-[80px] text-center transition-opacity hover:opacity-75 ${BADGE[currentStatus] ?? 'bg-gray-100 text-gray-600 dark:bg-white/5 dark:text-gray-400'}`}
             >
                 {label(currentStatus)}
             </button>
 
             {open && (
-                <div className="absolute right-0 top-8 z-30 bg-white dark:bg-[#252528] border border-gray-200 dark:border-white/10 rounded-xl shadow-lg py-1 min-w-[150px]">
+                <div className="absolute right-0 top-8 z-50 bg-white dark:bg-[#252528] border border-gray-200 dark:border-white/10 rounded-xl shadow-lg py-1 min-w-[150px]">
                     {STATUSES.map(s => (
                         <button
                             key={s}
