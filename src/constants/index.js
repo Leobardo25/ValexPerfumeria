@@ -56,7 +56,7 @@ export const MOODBOARD_IMAGES = [
 
 export const BRAND = {
     name: 'VALEX',
-    tagline: 'Perfumería de Autor',
+    tagline: 'Valex Perfumería',
     description: 'Fragancias exclusivas para quienes entienden que el aroma es la firma más íntima del estilo.',
     copyright: `© ${new Date().getFullYear()} VALEX Perfumería. Todos los derechos reservados.`,
 }

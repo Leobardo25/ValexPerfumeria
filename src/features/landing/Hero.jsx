@@ -7,7 +7,7 @@ import { heroReveal, fadeInUp, VALEX_TRANSITION, VALEX_SLOW } from '../../consta
 
 export default function Hero() {
     return (
-        <section className="relative h-screen w-full bg-valex-negro flex flex-col items-center justify-center overflow-hidden snap-start">
+        <section className="relative min-h-[100dvh] w-full bg-valex-negro flex flex-col items-center justify-center overflow-hidden snap-start pt-24 pb-16 lg:py-0">
             
             {/* Background Video (Local) - Aplicado Desenfoque Bokeh para Enmascarar la Marca */}
             <div className="absolute inset-0 w-full h-full z-0 pointer-events-none select-none overflow-hidden">
@@ -28,7 +28,7 @@ export default function Hero() {
             </div>
 
             {/* Main Content */}
-            <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 w-full max-w-5xl mx-auto -mt-16">
+            <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 w-full max-w-5xl mx-auto mt-0 lg:-mt-16 pb-12 lg:pb-0">
                 <HeroBadge />
                 <HeroTitle />
                 <div className="w-16 h-[1px] bg-valex-bronce/30 my-8 shadow-sm" />
@@ -48,7 +48,7 @@ export default function Hero() {
 
             {/* Scroll Indicator - Habilitado para todas las resoluciones (Mobile + Desktop) */}
             <motion.div 
-                className="absolute bottom-24 lg:bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 cursor-pointer group"
+                className="absolute bottom-6 lg:bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 cursor-pointer group"
                 onClick={() => document.getElementById('colecciones')?.scrollIntoView({ behavior: 'smooth' })}
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
@@ -81,7 +81,7 @@ function HeroBadge() {
             transition={VALEX_SLOW} 
             className="inline-block text-valex-bronce font-sans font-medium text-xs tracking-[0.25em] uppercase border border-valex-bronce/30 px-4 py-1.5 rounded-full"
         >
-            {heroBadge || 'Perfumería de Autor'}
+            {heroBadge || 'Valex Perfumería'}
         </motion.span>
     )
 }
@@ -101,7 +101,7 @@ function HeroTitle() {
             transition={VALEX_SLOW} 
             className="flex items-center pt-6 justify-center"
         >
-            <h1 className="font-serif font-bold text-5xl md:text-6xl lg:text-7xl text-valex-hueso leading-[1.1] tracking-tight">
+            <h1 className="font-serif font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-valex-hueso leading-[1.1] tracking-tight">
                 {main}{accent ? ' ' : ''}
                 {accent && <span className="text-valex-bronce italic">{accent}</span>}
             </h1>
@@ -118,7 +118,7 @@ function HeroSubtitle() {
             whileInView="visible"
             viewport={{ once: false, amount: 0.1 }}
             transition={VALEX_SLOW} 
-            className="text-valex-hueso/80 text-lg sm:text-xl leading-relaxed max-w-2xl font-light text-center"
+            className="text-valex-hueso/80 text-base sm:text-lg lg:text-xl leading-relaxed max-w-2xl font-light text-center px-2"
         >
             {heroSubtitle || HERO_CONTENT.subtitle}
         </motion.p>
@@ -136,10 +136,10 @@ function HeroCTA() {
             transition={VALEX_SLOW} 
             className="flex flex-col sm:flex-row gap-4 pt-4 justify-center"
         >
-            <Link to="/tienda" className="inline-flex items-center justify-center gap-2 font-sans font-semibold text-sm px-10 py-4 rounded-lg bg-valex-bronce text-valex-negro hover:bg-valex-bronce-dark shadow-lg hover:shadow-valex-bronce/30 transition-all duration-300 tracking-wide">
+            <Link to="/tienda" className="inline-flex items-center justify-center gap-2 font-sans font-semibold text-sm px-8 py-3.5 sm:px-10 sm:py-4 rounded-lg bg-valex-bronce text-valex-negro hover:bg-valex-bronce-dark shadow-lg hover:shadow-valex-bronce/30 transition-all duration-300 tracking-wide w-full sm:w-auto">
                 Ver Catálogo
             </Link>
-            <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 font-sans font-medium text-sm px-10 py-4 rounded-lg border border-valex-gris/20 text-valex-gris hover:text-valex-hueso hover:border-valex-gris/40 transition-all duration-300 tracking-wide">
+            <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 font-sans font-medium text-sm px-8 py-3.5 sm:px-10 sm:py-4 rounded-lg border border-valex-gris/20 text-valex-gris hover:text-valex-hueso hover:border-valex-gris/40 transition-all duration-300 tracking-wide w-full sm:w-auto">
                 <FaWhatsapp className="w-5 h-5" />
                 Contactar por WhatsApp
             </a>

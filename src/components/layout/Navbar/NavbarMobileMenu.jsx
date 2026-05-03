@@ -31,13 +31,25 @@ export default function NavbarMobileMenu({ menuOpen, setMenuOpen, scrollToTop, g
     
     return (
         <motion.div
-            className="md:hidden fixed inset-0 z-[100] bg-[#111112]"
-            initial={{ opacity: 0, x: '-100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '-100%' }}
-            transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
+            className="md:hidden fixed inset-0 z-[100] flex"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
         >
-            <div className="h-full flex flex-col px-5">
+            <div 
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+                onClick={() => setMenuOpen(false)}
+            />
+            
+            <motion.div
+                className="relative w-[75vw] max-w-[320px] h-full bg-[#111112] shadow-2xl flex flex-col border-r border-valex-bronce/10"
+                initial={{ x: '-100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '-100%' }}
+                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            >
+                <div className="h-full flex flex-col px-5 overflow-y-auto pb-8">
                 <div className="flex items-center justify-between pt-5 pb-8 border-b border-valex-gris/10">
                     <button
                         onClick={() => setMenuOpen(false)}
@@ -91,7 +103,8 @@ export default function NavbarMobileMenu({ menuOpen, setMenuOpen, scrollToTop, g
                 >
                     <SocialIcons />
                 </motion.div>
-            </div>
+                </div>
+            </motion.div>
         </motion.div>
     );
 }

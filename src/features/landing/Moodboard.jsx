@@ -24,19 +24,16 @@ export default function Moodboard() {
                     transition={VALEX_TRANSITION}
                 >
                     <span className="inline-block text-valex-bronce font-sans font-medium text-[10px] sm:text-xs tracking-[0.3em] uppercase mb-6">
-                        Nuestro Universo
+                        Nuestra Misión
                     </span>
-                    <h2 className="font-serif font-bold text-4xl sm:text-5xl lg:text-6xl text-valex-hueso leading-[1.1] mb-6">
-                        El Lujo está en{' '}
-                        <span className="text-valex-bronce italic font-medium">los Detalles</span>
+                    <h2 className="font-serif font-bold text-4xl sm:text-5xl lg:text-6xl text-valex-hueso leading-[1.1] mb-8">
+                        En Valex{' '}
+                        <span className="text-valex-bronce italic font-medium">Perfume</span>
                     </h2>
-                    <p className="text-valex-gris/60 text-sm md:text-base font-light max-w-xl mx-auto leading-relaxed">
-                        {BRAND.description}
+                    <p className="text-valex-gris/80 text-base sm:text-lg lg:text-xl font-light max-w-4xl mx-auto leading-relaxed text-justify sm:text-center">
+                        En Valex Perfumería tenemos la misión de que tu experiencia adquiriendo fragancias sea especial y que no solo compres el perfume que tienes en mente, sino que puedas apoyarte en nuestra experiencia y conocimientos para poder ayudarte a seleccionar el perfume con la fragancia, las notas y los matices que se ajusten a tu gusto, a tu personalidad y que se ajusten para cada ocasión de tu día a día. Porque en Valex no solo queremos venderte un perfume sino una experiencia, ya que creemos fielmente que la perfumería es un arte y algo que te define y toca las fibras de tus emociones y las de los demás.
                     </p>
                 </motion.div>
-
-                {/* About content — expanded info (Los 3 pilares de la marca) */}
-                <AboutContent />
 
                 {/* Llamado a la Acción (CTA final hacia la tienda) */}
                 <motion.div 

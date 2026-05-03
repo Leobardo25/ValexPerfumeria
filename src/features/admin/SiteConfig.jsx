@@ -78,7 +78,7 @@ export default function SiteConfig() {
                     <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Marca</h2>
                     <div className="space-y-4">
                         <Field label="Nombre de la tienda" name="brandName" value={form.brandName} onChange={handleChange} placeholder="VALEX" />
-                        <Field label="Tagline" name="brandTagline" value={form.brandTagline} onChange={handleChange} placeholder="Perfumería de Autor" />
+                        <Field label="Tagline" name="brandTagline" value={form.brandTagline} onChange={handleChange} placeholder="Valex Perfumería" />
                     </div>
                 </section>
 

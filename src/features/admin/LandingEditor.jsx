@@ -57,7 +57,7 @@ function SectionCard({ icon: Icon, title, accent, children }) {
 const LANDING_DEFAULTS = {
     heroTitle: 'El Arte de Oler Increíble',
     heroSubtitle: 'Descubra fragancias exclusivas diseñadas para cautivar',
-    heroBadge: 'Perfumería de Autor',
+    heroBadge: 'Valex Perfumería',
     stat1Value: '50+', stat1Label: 'Fragancias',
     stat2Value: '2K+', stat2Label: 'Clientes',
     stat3Value: '8+',  stat3Label: 'Años',
@@ -70,9 +70,7 @@ const LANDING_DEFAULTS = {
 
 const DEFAULT_FAQ_ITEMS = [
     { question: '¿Son originales los perfumes que venden?', answer: 'En VALEX, garantizamos un 100% de autenticidad en cada uno de nuestros productos. Sabemos que comprar fragancias online puede generar dudas, y para nosotros la reputación es la clave para sobresalir y mantenernos en esta industria a largo plazo. No estamos aquí para el corto plazo; queremos construir una relación de confianza y excelencia con nuestros clientes. Tu confianza es nuestra prioridad, y en VALEX puedes comprar con total tranquilidad.' },
-    { question: '¿Hacen envíos a todo Costa Rica?', answer: '¡Sí! Realizamos envíos a cualquier lugar de Costa Rica mediante Correos CR o mensajería privada. Nos esforzamos por entregarte tu fragancia favorita en el menor tiempo posible y en perfectas condiciones.' },
-    { question: '¿Cuáles opciones de pedido ofrecen?', answer: 'Ofrecemos dos modalidades de pedido para adaptarnos a tus necesidades:\n\nPedido Nacional: Si deseas recibir tu fragancia rápidamente, puedes optar por comprarla directamente desde nuestro inventario en Costa Rica. Esto permite un despacho rápido, con entrega en 1-3 días hábiles.\n\nPedido Internacional: Si prefieres una opción más económica, puedes colocar una orden bajo nuestra modalidad de importación semanal. Cada domingo cerramos las órdenes de la semana y realizamos una compra a Norteamérica. Esta opción puede tardar entre 10 y 15 días hábiles, pero permite acceder a precios mucho más accesibles.' },
-    { question: '¿Los perfumes tienen garantía?', answer: 'Absolutamente. Todos nuestros perfumes cuentan con garantía de autenticidad y calidad. Si alguna vez sientes que tu compra no cumple con tus expectativas, contáctanos y nos aseguraremos de resolver cualquier inconveniente de forma rápida y justa.' },
+    { question: '¿Hacen envíos a todo Costa Rica?', answer: '¡Sí! Realizamos envíos a cualquier lugar de Costa Rica mediante Correos CR y mensajería privada en la zona de occidente, nada más. Nos esforzamos por entregarte tu fragancia favorita en el menor tiempo posible y en perfectas condiciones.' },
     { question: '¿Cómo puedo realizar un pedido?', answer: 'Puedes realizar tu pedido directamente desde nuestra tienda online añadiendo los productos a tu bolsa, o si prefieres una atención más personalizada, contáctanos por WhatsApp y con gusto te asesoramos para encontrar la fragancia perfecta para ti.' },
 ];
 
@@ -355,7 +353,7 @@ export default function LandingEditor() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <SectionCard icon={Tag} title="Marca" accent="#A68966">
                         <Field label="Nombre de la tienda" name="brandName" value={form.brandName} onChange={handleChange} placeholder="VALEX" />
-                        <Field label="Tagline" name="brandTagline" value={form.brandTagline} onChange={handleChange} placeholder="Perfumería de Autor" />
+                        <Field label="Tagline" name="brandTagline" value={form.brandTagline} onChange={handleChange} placeholder="Valex Perfumería" />
                     </SectionCard>
 
                     <SectionCard icon={Phone} title="Contacto" accent="#0ea5e9">
@@ -377,7 +375,7 @@ export default function LandingEditor() {
                 {/* Fila 3: Hero + Estadísticas */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <SectionCard icon={Clapperboard} title="Hero" accent="#8b5cf6">
-                        <Field label="Badge" name="heroBadge" value={form.heroBadge} onChange={handleChange} placeholder="Perfumería de Autor" />
+                        <Field label="Badge" name="heroBadge" value={form.heroBadge} onChange={handleChange} placeholder="Valex Perfumería" />
                         <Field label="Título principal" name="heroTitle" value={form.heroTitle} onChange={handleChange} placeholder="El Arte de Oler Increíble" />
                         <Field label="Subtítulo" name="heroSubtitle" value={form.heroSubtitle} onChange={handleChange} multiline placeholder="Descubra fragancias exclusivas..." />
                     </SectionCard>

@@ -42,7 +42,7 @@ export default function Shop() {
     const [loading, setLoading] = useState(true);
     const [menuOpen, setMenuOpen] = useState(false);
     const [drawerVisible, setDrawerVisible] = useState(false);
-    const [isCompactView, setIsCompactView] = useState(() => JSON.parse(sessionStorage.getItem('valex_isCompactView') || 'false'));
+    const [isCompactView, setIsCompactView] = useState(() => JSON.parse(sessionStorage.getItem('valex_isCompactView') ?? 'true'));
     const [useBgImages, setUseBgImages] = useState(() => JSON.parse(sessionStorage.getItem('valex_useBgImages') ?? 'true'));
 
     // --- ESTADO DE FILTROS ---
@@ -124,7 +124,7 @@ export default function Shop() {
     // --- FILTROS (useMemo para evitar re-montar durante el drag del slider) ---
     const filtersNode = useMemo(() => (
         <div className="flex flex-col h-full w-full">
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 overflow-y-auto md:overflow-hidden">
+            <div className="flex-1 flex flex-col gap-8 overflow-y-auto pr-2 pb-6">
                 
                 {/* GÉNERO */}
                 <div className="space-y-4">
@@ -335,28 +335,7 @@ export default function Shop() {
                             </section>
                         </div>
 
-                    {/* Botón flotante para cambiar tipo de imagen */}
-                    <button
-                        onClick={() => setUseBgImages(prev => !prev)}
-                        className="fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-500 hover:scale-110 active:scale-95 group border"
-                        style={{
-                            background: useBgImages 
-                                ? 'linear-gradient(135deg, #1A1A1B 0%, #2a2a2b 100%)' 
-                                : 'linear-gradient(135deg, #F5F5F5 0%, #ffffff 100%)',
-                            borderColor: useBgImages ? 'rgba(166,137,102,0.4)' : 'rgba(209,209,209,0.4)',
-                        }}
-                        title={useBgImages ? 'Cambiar a fondo blanco' : 'Cambiar a fondo cinematográfico'}
-                    >
-                        {useBgImages ? (
-                            <PictureOutlined className="text-xl" style={{ color: '#A68966' }} />
-                        ) : (
-                            <BgColorsOutlined className="text-xl" style={{ color: '#1A1A1B' }} />
-                        )}
-                        {/* Tooltip label */}
-                        <span className="absolute left-[calc(100%+8px)] whitespace-nowrap bg-valex-negro/90 text-valex-hueso text-[10px] font-sans tracking-wider px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none border border-valex-bronce/20">
-                            {useBgImages ? 'Fondo Blanco' : 'Fondo Cinemático'}
-                        </span>
-                    </button>
+
                 </main>
             </div>
         </ConfigProvider>

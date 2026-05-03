@@ -12,15 +12,7 @@ const DEFAULT_FAQS = [
     },
     {
         question: '¿Hacen envíos a todo Costa Rica?',
-        answer: '¡Sí! Realizamos envíos a cualquier lugar de Costa Rica mediante Correos CR o mensajería privada. Nos esforzamos por entregarte tu fragancia favorita en el menor tiempo posible y en perfectas condiciones.'
-    },
-    {
-        question: '¿Cuáles opciones de pedido ofrecen?',
-        answer: 'Ofrecemos dos modalidades de pedido para adaptarnos a tus necesidades:\n\nPedido Nacional: Si deseas recibir tu fragancia rápidamente, puedes optar por comprarla directamente desde nuestro inventario en Costa Rica. Esto permite un despacho rápido, con entrega en 1-3 días hábiles.\n\nPedido Internacional: Si prefieres una opción más económica, puedes colocar una orden bajo nuestra modalidad de importación semanal. Cada domingo cerramos las órdenes de la semana y realizamos una compra a Norteamérica. Esta opción puede tardar entre 10 y 15 días hábiles, pero permite acceder a precios mucho más accesibles.'
-    },
-    {
-        question: '¿Los perfumes tienen garantía?',
-        answer: 'Absolutamente. Todos nuestros perfumes cuentan con garantía de autenticidad y calidad. Si alguna vez sientes que tu compra no cumple con tus expectativas, contáctanos y nos aseguraremos de resolver cualquier inconveniente de forma rápida y justa.'
+        answer: '¡Sí! Realizamos envíos a cualquier lugar de Costa Rica mediante Correos CR y mensajería privada en la zona de occidente, nada más. Nos esforzamos por entregarte tu fragancia favorita en el menor tiempo posible y en perfectas condiciones.'
     },
     {
         question: '¿Cómo puedo realizar un pedido?',
