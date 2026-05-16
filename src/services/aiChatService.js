@@ -7,7 +7,8 @@ const FALLBACK_MODELS = [
   'deepseek/deepseek-v4-flash',
   'google/gemini-1.5-flash:free',
   'meta-llama/llama-3.2-3b-instruct:free',
-  'mistralai/mistral-7b-instruct:free'
+  'mistralai/mistral-7b-instruct:free',
+  'meta-llama/llama-3.3-70b-instruct' // Modelo de pago (Último recurso)
 ];
 
 /**
