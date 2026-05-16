@@ -7,10 +7,13 @@ import FeaturedProducts from '../features/landing/FeaturedProducts'
 import Moodboard from '../features/landing/Moodboard'
 import FAQ from '../features/landing/FAQ'
 import Footer from '../components/layout/Footer'
+import { useSiteConfig } from '../context/SiteConfigContext'
 
 export default function Landing() {
     const [showFloatingBtn, setShowFloatingBtn] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
+    const { whatsapp } = useSiteConfig()
+    const waNumber = whatsapp || '50687329055'
 
     // Usamos el hook nativo de Window para que Navbar.jsx entienda si el panel ha bajado
     useEffect(() => {
@@ -38,7 +41,7 @@ export default function Landing() {
             <AnimatePresence>
                 {showFloatingBtn && !menuOpen && (
                     <motion.a
-                        href="https://wa.me/xxxxxxxxxx"
+                        href={`https://wa.me/${waNumber}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="fixed bottom-6 right-4 z-30 flex items-center justify-center w-14 h-14 bg-valex-bronce rounded-full hover:scale-110 transition-transform duration-500 ease-out shadow-xl animate-glow-pulse"

@@ -5,6 +5,7 @@ import { getOrders } from '../../services/orderService';
 import { getProducts } from '../../services/productService';
 import { seedOrders } from '../../services/seedOrders';
 import { toast } from 'react-toastify';
+import { useAuth } from '../../context/AuthContext';
 import OrderStatusDropdown from './OrderStatusDropdown';
 import OrderFilters from './OrderFilters';
 import OrderStats from './OrderStats';
@@ -22,7 +23,7 @@ const buildWaInvoiceMessage = (order) => {
     return encodeURIComponent(`Hola ${order.cliente}, aquí está tu factura de compra en Valex Perfumería 💜\n${url}`);
 };
 
-function OrderRow({ order, productImages, onStatusUpdated }) {
+function OrderRow({ order, productImages, products, onStatusUpdated, adminName }) {
     const [expanded, setExpanded] = useState(false);
     const date = order.createdAt?.toDate?.()?.toLocaleDateString('es-CR', { day: '2-digit', month: 'short', year: 'numeric' }) ?? '—';
     const waPhone = order.telefono?.replace(/\D/g, '');
@@ -48,6 +49,9 @@ function OrderRow({ order, productImages, onStatusUpdated }) {
                         orderId={order.id}
                         currentStatus={order.status}
                         onUpdated={onStatusUpdated}
+                        order={order}
+                        products={products}
+                        adminName={adminName}
                     />
                     {expanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
                 </div>
@@ -164,11 +168,15 @@ export default function OrdersList() {
     const [loading, setLoading] = useState(true);
     const [activeFilter, setActiveFilter] = useState(null);
     const [seeding, setSeeding] = useState(false);
+    const [allProducts, setAllProducts] = useState([]);
+    const { userData } = useAuth();
+    const adminName = userData?.nombre || userData?.email || 'Admin';
 
     const load = async () => {
         try {
             const [data, products] = await Promise.all([getOrders(), getProducts()]);
             setOrders(data);
+            setAllProducts(products);
             const imgMap = {};
             products.forEach(p => { if (p.name) imgMap[p.name] = p.coverImage || p.imageUrl || null; });
             setProductImages(imgMap);
@@ -246,7 +254,9 @@ export default function OrdersList() {
                             key={order.id}
                             order={order}
                             productImages={productImages}
+                            products={allProducts}
                             onStatusUpdated={(status) => handleStatusUpdated(order.id, status)}
+                            adminName={adminName}
                         />
                     ))}
                 </div>

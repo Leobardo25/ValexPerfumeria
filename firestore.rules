@@ -7,10 +7,10 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Productos: lectura pública, escritura abierta (ajustar cuando haya roles)
+    // Productos: lectura pública, escritura solo para admins
     match /products/{document=**} {
       allow read: if true;
-      allow write: if true;
+      allow write: if request.auth != null;
     }
 
     // Pedidos: cualquiera puede crear (checkout), solo admins pueden leer/actualizar
@@ -25,13 +25,19 @@ service cloud.firestore {
       allow write: if request.auth != null;
     }
 
-    // Contadores: necesarios para el número de orden secuencial
+    // Contadores: lectura pública (checkout necesita leer), escritura solo autenticados
     match /counters/{docId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if request.auth != null;
     }
 
     // Clientes CRM: solo admins (usuarios autenticados)
     match /customers/{customerId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Movimientos de inventario: solo admins (usuarios autenticados)
+    match /inventory_movements/{movementId} {
       allow read, write: if request.auth != null;
     }
   }

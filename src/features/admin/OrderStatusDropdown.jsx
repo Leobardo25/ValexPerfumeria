@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { updateOrderStatus } from '../../services/orderService';
+import { createSaleMovements } from '../../services/movementService';
 import { toast } from 'react-toastify';
 
 const STATUSES = ['nuevo', 'en proceso', 'entregado', 'cancelado'];
@@ -20,7 +21,15 @@ const BADGE = {
 
 const label = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-export default function OrderStatusDropdown({ orderId, currentStatus, onUpdated }) {
+/**
+ * @param {string} orderId
+ * @param {string} currentStatus
+ * @param {Function} onUpdated - callback(newStatus)
+ * @param {Object} [order] - Full order object (needed for auto-sale registration)
+ * @param {Array}  [products] - All products array (needed to resolve product IDs)
+ * @param {string} [adminName] - Name of the admin for movement tracking
+ */
+export default function OrderStatusDropdown({ orderId, currentStatus, onUpdated, order, products, adminName }) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const ref = useRef(null);
@@ -37,8 +46,21 @@ export default function OrderStatusDropdown({ orderId, currentStatus, onUpdated 
         setOpen(false);
         try {
             await updateOrderStatus(orderId, status);
+            
+            // Si se marca como "entregado" y tenemos datos del pedido, registrar salidas
+            if (status === 'entregado' && currentStatus !== 'entregado' && order && products?.length > 0) {
+                try {
+                    await createSaleMovements(order, products, adminName || 'Admin');
+                    toast.success('Pedido entregado — salidas registradas automáticamente ✓');
+                } catch (moveErr) {
+                    console.error('Error registrando movimientos de venta:', moveErr);
+                    toast.warning('Estado actualizado, pero hubo un error registrando los movimientos de inventario.');
+                }
+            } else {
+                toast.success('Estado actualizado');
+            }
+            
             onUpdated(status);
-            toast.success('Estado actualizado');
         } catch {
             toast.error('Error al actualizar estado');
         } finally {

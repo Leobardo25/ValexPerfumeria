@@ -20,6 +20,7 @@ import SiteConfig from './features/admin/SiteConfig';
 import SeedProducts from './pages/SeedProducts';
 import InvoicePage from './pages/InvoicePage';
 import PolicyPage from './pages/PolicyPage';
+import { MovementsList } from './features/admin/inventory-movements';
 
 function AppRoutes() {
   return (
@@ -45,6 +46,7 @@ function AppRoutes() {
         <Route path="/admin" element={<AdminDashboard />}>
           <Route index element={<AdminHome />} />
           <Route path="inventory" element={<InventoryList />} />
+          <Route path="movements" element={<MovementsList />} />
           <Route path="products/new" element={<ProductForm />} />
           <Route path="products/edit/:id" element={<ProductForm />} />
           <Route path="orders" element={<OrdersList />} />

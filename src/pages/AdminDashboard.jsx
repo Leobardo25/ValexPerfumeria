@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Outlet, NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingBag, Settings, Menu, X, LogOut, Users, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, Settings, Menu, X, LogOut, Users, Sun, Moon, ArrowLeftRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { AdminThemeProvider, useAdminTheme } from '../context/AdminThemeContext';
+import AdminAIChat from '../features/admin/AdminAIChat';
 
 const NAV_ITEMS = [
     { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
     { to: '/admin/inventory', label: 'Catálogo', icon: Package },
+    { to: '/admin/movements', label: 'Entradas/Salidas', icon: ArrowLeftRight },
     { to: '/admin/orders', label: 'Pedidos', icon: ShoppingBag },
     { to: '/admin/customers', label: 'Clientes', icon: Users },
     { to: '/admin/landing', label: 'Configuración', icon: Settings },
@@ -117,6 +119,9 @@ function AdminLayout() {
                         </div>
                     </main>
                 </div>
+
+                {/* Asistente IA */}
+                <AdminAIChat />
             </div>
     );
 }

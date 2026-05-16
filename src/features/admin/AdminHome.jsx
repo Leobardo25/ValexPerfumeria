@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, ShoppingBag, Users, AlertTriangle, ArrowRight, TrendingUp, Clock, CheckCircle2, DollarSign, Sparkles, ClipboardCheck, ChefHat, Truck, PartyPopper, XCircle } from 'lucide-react';
+import { Package, ShoppingBag, Users, AlertTriangle, ArrowRight, TrendingUp, Clock, CheckCircle2, DollarSign, Sparkles, ClipboardCheck, ChefHat, Truck, PartyPopper, XCircle, ArrowLeftRight, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
 import { IoLogoWhatsapp } from 'react-icons/io';
 import { getProducts } from '../../services/productService';
 import { getOrders } from '../../services/orderService';
 import { getCustomers } from '../../services/customerService';
+import { getRecentMovements, MOVEMENT_TYPES } from '../../services/movementService';
+import { useAuth } from '../../context/AuthContext';
 import OrderStatusDropdown from './OrderStatusDropdown';
 
 /* ── Stat Card (top row) ── */
@@ -72,18 +74,24 @@ export default function AdminHome() {
     const [recentOrders, setRecentOrders] = useState([]);
     const [allOrders, setAllOrders] = useState([]);
     const [lowStockProducts, setLowStockProducts] = useState([]);
+    const [recentMovements, setRecentMovements] = useState([]);
+    const [allProducts, setAllProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { userData } = useAuth();
+    const adminName = userData?.nombre || userData?.email || 'Admin';
 
     useEffect(() => {
         const load = async () => {
             try {
-                const [products, orders, customers] = await Promise.all([
+                const [products, orders, customers, movements] = await Promise.all([
                     getProducts(),
                     getOrders(),
                     getCustomers(),
+                    getRecentMovements(5),
                 ]);
 
                 const available = products.filter(p => p.stock === 'Disponible').length;
+                setAllProducts(products);
                 const outOfStock = products.filter(p => p.stock === 'Agotado' || p.stock === 'Bóveda (Retirado)').length;
                 const lowStock = products.filter(p => p.stock === 'Disponible' && typeof p.quantity === 'number' && p.quantity > 0 && p.quantity <= 3);
                 const pendingOrders = orders.filter(o => o.status === 'nuevo' || o.status === 'confirmado' || o.status === 'preparando');
@@ -129,6 +137,7 @@ export default function AdminHome() {
                 setRecentOrders(orders.slice(0, 5));
                 setAllOrders(orders);
                 setLowStockProducts(lowStock.slice(0, 5));
+                setRecentMovements(movements);
             } catch (e) {
                 console.error(e);
             } finally {
@@ -234,6 +243,9 @@ export default function AdminHome() {
                                                 orderId={order.id}
                                                 currentStatus={order.status}
                                                 onUpdated={(status) => handleStatusUpdated(order.id, status)}
+                                                order={order}
+                                                products={allProducts}
+                                                adminName={adminName}
                                             />
                                         </div>
                                     </div>
@@ -276,6 +288,43 @@ export default function AdminHome() {
                     )}
                 </DashSection>
             </div>
+
+            {/* ── Últimos Movimientos de Inventario ── */}
+            {!loading && recentMovements.length > 0 && (
+                <DashSection title="Últimos Movimientos" icon={ArrowLeftRight} linkTo="/admin/movements">
+                    <div className="space-y-2">
+                        {recentMovements.map(m => {
+                            const isEntrada = m.type === 'entrada';
+                            const reasonLabel = MOVEMENT_TYPES[m.type]?.reasons?.find(r => r.value === m.reason)?.label || m.reason;
+                            return (
+                                <div key={m.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-[#1A1A1B] border border-gray-100 dark:border-white/5">
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                        isEntrada
+                                            ? 'bg-emerald-50 dark:bg-emerald-500/15'
+                                            : 'bg-red-50 dark:bg-red-500/15'
+                                    }`}>
+                                        {isEntrada
+                                            ? <ArrowDownCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                                            : <ArrowUpCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                                        }
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{m.productName}</p>
+                                        <p className="text-[11px] text-gray-400 mt-0.5">
+                                            {reasonLabel} · {formatDate(m.createdAt)}
+                                        </p>
+                                    </div>
+                                    <span className={`text-sm font-bold flex-shrink-0 ${
+                                        isEntrada ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
+                                    }`}>
+                                        {isEntrada ? '+' : '-'}{m.quantity}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </DashSection>
+            )}
 
             {/* ── Alertas de Stock Bajo ── */}
             {!loading && lowStockProducts.length > 0 && (

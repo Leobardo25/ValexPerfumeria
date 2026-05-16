@@ -52,7 +52,7 @@ body {
 
 /* ── Admin panel scrollbar (light theme override) ── */
 .scrollbar-admin::-webkit-scrollbar {
-  width: 5px;
+  width: 4px;
 }
 .scrollbar-admin::-webkit-scrollbar-track {
   background: #f1f5f9;
@@ -67,6 +67,21 @@ body {
 .scrollbar-admin {
   scrollbar-width: thin;
   scrollbar-color: #c7d2fe #f1f5f9;
+}
+
+/* ── Admin scrollbar — dark theme ── */
+.dark .scrollbar-admin::-webkit-scrollbar-track {
+  background: #1A1A1B;
+}
+.dark .scrollbar-admin::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 10px;
+}
+.dark .scrollbar-admin::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
+.dark .scrollbar-admin {
+  scrollbar-color: #3f3f46 #1A1A1B;
 }
 
 /* ── Animated gradient text for VALEX logo ── */

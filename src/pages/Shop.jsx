@@ -5,9 +5,11 @@ import { db } from '../firebase/firebase';
 import { Layout, Row, Col, Card, Button, Badge, Skeleton, Radio, Checkbox, Slider, Collapse, Typography, FloatButton, Drawer, notification, ConfigProvider, theme as antTheme, Grid, Input } from 'antd';
 import { FilterOutlined, SearchOutlined, PictureOutlined, BgColorsOutlined } from '@ant-design/icons';
 import { ShoppingBag } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useProductDrawer } from '../context/ProductDrawerContext';
+import { useSiteConfig } from '../context/SiteConfigContext';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 
@@ -44,6 +46,10 @@ export default function Shop() {
     const [drawerVisible, setDrawerVisible] = useState(false);
     const [isCompactView, setIsCompactView] = useState(() => JSON.parse(sessionStorage.getItem('valex_isCompactView') ?? 'true'));
     const [useBgImages, setUseBgImages] = useState(() => JSON.parse(sessionStorage.getItem('valex_useBgImages') ?? 'true'));
+    
+    const { whatsapp } = useSiteConfig();
+    const waNumber = whatsapp || '50687329055';
+    const [showFloatingBtn, setShowFloatingBtn] = useState(false);
 
     // --- ESTADO DE FILTROS ---
     const [filterCategory, setFilterCategory] = useState(() => sessionStorage.getItem('valex_category') || 'Todos');
@@ -51,8 +57,16 @@ export default function Shop() {
     const [filterPrice, setFilterPrice] = useState(() => JSON.parse(sessionStorage.getItem('valex_price') || '[0, 300]')); // Max price assumed $300
     const [searchQuery, setSearchQuery] = useState(() => sessionStorage.getItem('valex_search') || '');
 
-    // Scroll al tope al entrar a la tienda
-    useEffect(() => { window.scrollTo(0, 0); }, []);
+    // Scroll al tope al entrar a la tienda y manejar scroll del boton flotante
+    useEffect(() => { 
+        window.scrollTo(0, 0); 
+        
+        const handleScroll = () => {
+            setShowFloatingBtn(window.scrollY > 200);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     // Mantener estado local para no perder la navegación
     useEffect(() => {
@@ -335,6 +349,24 @@ export default function Shop() {
                             </section>
                         </div>
 
+                    {/* Floating WhatsApp button */}
+                    <AnimatePresence>
+                        {showFloatingBtn && !drawerVisible && !menuOpen && (
+                            <motion.a
+                                href={`https://wa.me/${waNumber}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="fixed bottom-6 right-4 z-30 flex items-center justify-center w-14 h-14 bg-valex-bronce rounded-full hover:scale-110 transition-transform duration-500 ease-out shadow-xl animate-glow-pulse"
+                                initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 20, scale: 0.8 }}
+                                transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+                                aria-label="Contactar por WhatsApp"
+                            >
+                                <FaWhatsapp className="w-7 h-7 text-valex-negro" />
+                            </motion.a>
+                        )}
+                    </AnimatePresence>
 
                 </main>
             </div>
