@@ -1,8 +1,8 @@
 // src/services/aiChatService.js
-// Servicio de IA para el Asistente Administrativo de Valex — Powered by Groq
+// Servicio de IA para el Asistente Administrativo de Valex — Powered by OpenRouter
 
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const MODEL = 'llama-3.3-70b-versatile';
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const MODEL = 'meta-llama/llama-3-8b-instruct:free';
 
 /**
  * Construye el system prompt con el contexto real del negocio.
@@ -79,10 +79,10 @@ ${ctx.lowStockDetail || 'Ninguno'}
  * @returns {Promise<string>} La respuesta del asistente
  */
 export const sendChatMessage = async (messages, businessContext = null) => {
-  const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+  const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
 
   if (!apiKey) {
-    throw new Error('No se ha configurado la clave API de Groq (VITE_GROQ_API_KEY).');
+    throw new Error('No se ha configurado la clave API de OpenRouter (VITE_OPENROUTER_API_KEY).');
   }
 
   const systemMessage = {
@@ -91,10 +91,12 @@ export const sendChatMessage = async (messages, businessContext = null) => {
   };
 
   try {
-    const response = await fetch(GROQ_API_URL, {
+    const response = await fetch(OPENROUTER_API_URL, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://valexperfumeria.com',
+        'X-Title': 'Valex Perfumeria Admin',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -108,7 +110,7 @@ export const sendChatMessage = async (messages, businessContext = null) => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `Error de Groq: ${response.status}`);
+      throw new Error(errorData.error?.message || `Error de OpenRouter: ${response.status}`);
     }
 
     const data = await response.json();
