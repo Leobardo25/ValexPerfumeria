@@ -2,7 +2,13 @@
 // Servicio de IA para el Asistente Administrativo de Valex — Powered by OpenRouter
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const MODEL = 'deepseek/deepseek-v4-flash';
+// Lista de modelos en orden de prioridad. Si el primero falla, salta al siguiente automáticamente.
+const FALLBACK_MODELS = [
+  'deepseek/deepseek-v4-flash',
+  'google/gemini-1.5-flash:free',
+  'meta-llama/llama-3.2-3b-instruct:free',
+  'mistralai/mistral-7b-instruct:free'
+];
 
 /**
  * Construye el system prompt con el contexto real del negocio.
@@ -74,9 +80,9 @@ ${ctx.lowStockDetail || 'Ninguno'}
 };
 
 /**
- * Envía un mensaje al chat de IA y obtiene la respuesta.
+ * Envía un mensaje al chat de IA usando un sistema de fallback automático.
  * @param {Array} messages - Historial de mensajes [{role, content}]
- * @param {Object|null} businessContext - Datos del negocio para inyectar en el system prompt
+ * @param {Object|null} businessContext - Datos del negocio para inyectar
  * @returns {Promise<string>} La respuesta del asistente
  */
 export const sendChatMessage = async (messages, businessContext = null) => {
@@ -91,33 +97,54 @@ export const sendChatMessage = async (messages, businessContext = null) => {
     content: buildSystemPrompt(businessContext),
   };
 
-  try {
-    const response = await fetch(OPENROUTER_API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': 'https://valexperfumeria.com',
-        'X-Title': 'Valex Perfumeria Admin',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [systemMessage, ...messages],
-        temperature: 0.6,
-        max_tokens: 8000,
-        stream: false,
-      }),
-    });
+  let lastError = null;
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `Error de OpenRouter: ${response.status}`);
+  // Intentar cada modelo en orden hasta que uno funcione
+  for (const modelId of FALLBACK_MODELS) {
+    try {
+      console.log(`Intentando conectar con modelo: ${modelId}...`);
+      
+      const response = await fetch(OPENROUTER_API_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'HTTP-Referer': 'https://valexperfumeria.com',
+          'X-Title': 'Valex Perfumeria Admin',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: modelId,
+          messages: [systemMessage, ...messages],
+          temperature: 0.6,
+          max_tokens: 8000,
+          stream: false,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `Error HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content?.trim();
+      
+      // Si el modelo devolvió un string vacío por error interno, forzamos el fallo
+      if (!content) {
+        throw new Error('El modelo devolvió una respuesta vacía');
+      }
+
+      // Si funcionó, devolvemos la respuesta inmediatamente y salimos del loop
+      return content;
+      
+    } catch (error) {
+      console.warn(`Falló el modelo ${modelId}:`, error.message);
+      lastError = error;
+      // Continúa con el siguiente modelo del array...
     }
-
-    const data = await response.json();
-    return data.choices?.[0]?.message?.content?.trim() || 'No pude generar una respuesta.';
-  } catch (error) {
-    console.error('Error en aiChatService:', error);
-    throw error;
   }
+
+  // Si llegamos aquí, es que TODOS los modelos fallaron
+  console.error('Error final: Todos los modelos de respaldo fallaron.', lastError);
+  throw new Error('Los servidores de IA están saturados en este momento. Por favor intenta en unos segundos.');
 };
