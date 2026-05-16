@@ -104,7 +104,7 @@ export const sendChatMessage = async (messages, businessContext = null) => {
         model: MODEL,
         messages: [systemMessage, ...messages],
         temperature: 0.6,
-        max_tokens: 1024,
+        max_tokens: 8000,
         stream: false,
       }),
     });
