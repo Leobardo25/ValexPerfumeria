@@ -4,11 +4,8 @@
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 // Lista de modelos en orden de prioridad. Si el primero falla, salta al siguiente automáticamente.
 const FALLBACK_MODELS = [
-  'deepseek/deepseek-v4-flash',
-  'google/gemini-1.5-flash:free',
-  'meta-llama/llama-3.2-3b-instruct:free',
-  'mistralai/mistral-7b-instruct:free',
-  'meta-llama/llama-3.3-70b-instruct' // Modelo de pago (Último recurso)
+  'deepseek/deepseek-v4-flash', // Modelo principal (Rápido)
+  'meta-llama/llama-3.3-70b-instruct' // Modelo de respaldo (Llama 3.3 Full)
 ];
 
 /**
