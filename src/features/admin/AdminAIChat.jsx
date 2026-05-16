@@ -154,15 +154,19 @@ export default function AdminAIChat() {
         }
     }, []);
 
-    // Al abrir, cargamos contexto y enfocamos input
+    // Al abrir, cargamos contexto y enfocamos input (solo en desktop)
     useEffect(() => {
         if (isOpen && !businessContext) {
             reloadContext();
             setPulse(false);
-            setTimeout(() => inputRef.current?.focus(), 300);
+            if (window.innerWidth > 768) {
+                setTimeout(() => inputRef.current?.focus(), 300);
+            }
         } else if (isOpen) {
             setPulse(false);
-            setTimeout(() => inputRef.current?.focus(), 300);
+            if (window.innerWidth > 768) {
+                setTimeout(() => inputRef.current?.focus(), 300);
+            }
         }
     }, [isOpen, businessContext, reloadContext]);
 
