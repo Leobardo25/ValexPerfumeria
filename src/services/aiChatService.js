@@ -2,7 +2,7 @@
 // Servicio de IA para el Asistente Administrativo de Valex — Powered by OpenRouter
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const MODEL = 'meta-llama/llama-3.1-8b-instruct:free';
+const MODEL = 'google/gemini-1.5-flash:free';
 
 /**
  * Construye el system prompt con el contexto real del negocio.
